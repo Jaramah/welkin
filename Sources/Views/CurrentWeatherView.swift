@@ -50,6 +50,10 @@ struct CurrentWeatherView: View {
                 .font(Theme.label(11))
                 .tracking(1)
                 .foregroundStyle(Color.auroraTertiary)
+
+            // Local delicacy to try — inline, no card.
+            LocalFlavorView(place: place)
+                .padding(.top, 14)
         }
         .frame(maxWidth: .infinity)
     }

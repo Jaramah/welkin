@@ -53,7 +53,7 @@ struct ContentView: View {
             VStack(spacing: 16) {
                 CurrentWeatherView(place: bundle.place, current: bundle.current,
                                    unit: viewModel.unit, scrollOffset: scrollY)
-                    .padding(.top, 70)
+                    .padding(.top, 4)
                     .padding(.bottom, 8)
 
                 if !bundle.hourly.isEmpty {
@@ -68,8 +68,6 @@ struct ContentView: View {
                     AirQualityView(aqi: aqi, pm25: bundle.pm25, pm10: bundle.pm10,
                                    ozone: bundle.ozone, no2: bundle.no2)
                 }
-
-                LocalFlavorView(place: bundle.place)
 
                 DetailGridView(current: bundle.current, unit: viewModel.unit, timezone: timezone)
 
