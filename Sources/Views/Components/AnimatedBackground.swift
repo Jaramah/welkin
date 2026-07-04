@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A slowly drifting MeshGradient whose palette is driven by the current sky mood.
-/// This is the core of Aurora's futuristic feel.
+/// This is the core of Welkin's futuristic feel.
 struct AnimatedBackground: View {
     let mood: SkyMood
     @State private var t: CGFloat = 0

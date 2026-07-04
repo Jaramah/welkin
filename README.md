@@ -1,11 +1,11 @@
-# Aurora
+# Welkin
 
 A sleek, futuristic iOS weather app built with SwiftUI. It shows the current
 conditions, an hourly forecast for the day, a 7-day outlook with per-day air
 quality, and a detailed air-quality breakdown — all over a weather- and
 time-of-day-adaptive animated `MeshGradient` background with glassmorphism cards.
 
-![Aurora](docs/screenshot.png)
+![Welkin](docs/screenshot.png)
 
 ## Features
 
@@ -50,19 +50,19 @@ required**: forecast, air quality, and geocoding.
 ## Build & run
 
 ```sh
-xcodegen generate                       # creates Aurora.xcodeproj from project.yml
-open Aurora.xcodeproj                    # then ⌘R in Xcode
+xcodegen generate                       # creates Welkin.xcodeproj from project.yml
+open Welkin.xcodeproj                    # then ⌘R in Xcode
 ```
 
 Or from the command line:
 
 ```sh
 xcodegen generate
-xcodebuild -project Aurora.xcodeproj -scheme Aurora \
+xcodebuild -project Welkin.xcodeproj -scheme Welkin \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 
-xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Aurora.app
-xcrun simctl launch booted com.aurora.weather.Aurora
+xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Welkin.app
+xcrun simctl launch booted com.welkin.weather.Welkin
 ```
 
 To test with a simulated location:

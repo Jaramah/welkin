@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Central design tokens for Aurora's sleek, futuristic look.
+/// Central design tokens for Welkin's sleek, futuristic look.
 enum Theme {
     // Typography
     static func display(_ size: CGFloat) -> Font {
@@ -22,7 +22,7 @@ enum Theme {
 }
 
 extension Color {
-    static let auroraPrimary = Color.white
-    static let auroraSecondary = Color.white.opacity(0.7)
-    static let auroraTertiary = Color.white.opacity(0.45)
+    static let welkinPrimary = Color.white
+    static let welkinSecondary = Color.white.opacity(0.7)
+    static let welkinTertiary = Color.white.opacity(0.45)
 }

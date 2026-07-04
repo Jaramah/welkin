@@ -3,7 +3,7 @@ import SwiftUI
 
 // MARK: - Timeline entry (shared so the app can preview widget layouts)
 
-struct AuroraEntry: TimelineEntry {
+struct WelkinEntry: TimelineEntry {
     let date: Date
     let placeName: String
     let landmark: Landmark
@@ -17,7 +17,7 @@ struct AuroraEntry: TimelineEntry {
     let unitSymbol: String
     let isPlaceholder: Bool
 
-    static let placeholder = AuroraEntry(
+    static let placeholder = WelkinEntry(
         date: .now,
         placeName: "New York",
         landmark: Landmark(kind: .statueOfLiberty, name: "Statue of Liberty"),
@@ -74,9 +74,9 @@ struct StaticLandmark: View {
     }
 }
 
-struct AuroraWidgetView: View {
+struct WelkinWidgetView: View {
     @Environment(\.widgetFamily) var family
-    let entry: AuroraEntry
+    let entry: WelkinEntry
 
     var body: some View {
         switch family {
@@ -97,7 +97,7 @@ struct AuroraWidgetView: View {
 // MARK: - Lock Screen (accessory) widgets
 
 struct RectangularAccessory: View {
-    let entry: AuroraEntry
+    let entry: WelkinEntry
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: entry.code.symbol)
@@ -120,7 +120,7 @@ struct RectangularAccessory: View {
 }
 
 struct CircularAccessory: View {
-    let entry: AuroraEntry
+    let entry: WelkinEntry
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
@@ -136,7 +136,7 @@ struct CircularAccessory: View {
 }
 
 struct SmallWidget: View {
-    let entry: AuroraEntry
+    let entry: WelkinEntry
 
     var body: some View {
         ZStack {
@@ -165,7 +165,7 @@ struct SmallWidget: View {
 }
 
 struct MediumWidget: View {
-    let entry: AuroraEntry
+    let entry: WelkinEntry
 
     var body: some View {
         HStack(spacing: 14) {

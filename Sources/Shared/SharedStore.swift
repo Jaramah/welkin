@@ -9,7 +9,7 @@ struct StoredPlace: Codable, Sendable {
 
 /// App-Group-backed storage bridging the app and the widget extension.
 enum SharedStore {
-    static let appGroup = "group.com.github.jaramah.aurora"
+    static let appGroup = "group.com.github.jaramah.welkin"
 
     private static let placeKey = "selectedPlace"
     private static let unitKey = "temperatureUnit"

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct AuroraApp: App {
+struct WelkinApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

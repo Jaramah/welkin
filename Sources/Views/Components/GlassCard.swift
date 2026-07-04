@@ -25,7 +25,7 @@ struct GlassCard<Content: View>: View {
                         Image(systemName: systemImage).font(.system(size: 12, weight: .bold))
                     }
                 }
-                .foregroundStyle(Color.auroraTertiary)
+                .foregroundStyle(Color.welkinTertiary)
             }
             content()
         }

@@ -16,13 +16,13 @@ struct LocalFlavorView: View {
                 Text("TASTE OF THE CITY")
                     .font(Theme.label(9))
                     .tracking(1.5)
-                    .foregroundStyle(Color.auroraTertiary)
+                    .foregroundStyle(Color.welkinTertiary)
                 Text(dish.name)
                     .font(Theme.title(16))
-                    .foregroundStyle(Color.auroraPrimary)
+                    .foregroundStyle(Color.welkinPrimary)
                 Text(dish.note)
                     .font(Theme.body(12))
-                    .foregroundStyle(Color.auroraSecondary)
+                    .foregroundStyle(Color.welkinSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

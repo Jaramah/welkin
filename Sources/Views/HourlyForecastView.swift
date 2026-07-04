@@ -12,7 +12,7 @@ struct HourlyForecastView: View {
                         VStack(spacing: 10) {
                             Text(index == 0 ? "Now" : hourLabel(hour.date))
                                 .font(Theme.label(13))
-                                .foregroundStyle(Color.auroraSecondary)
+                                .foregroundStyle(Color.welkinSecondary)
 
                             Image(systemName: hour.code.symbol)
                                 .symbolRenderingMode(.multicolor)
@@ -29,7 +29,7 @@ struct HourlyForecastView: View {
 
                             Text("\(Int(hour.temperature.rounded()))°")
                                 .font(Theme.title(18))
-                                .foregroundStyle(Color.auroraPrimary)
+                                .foregroundStyle(Color.welkinPrimary)
                         }
                     }
                 }

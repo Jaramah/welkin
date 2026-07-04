@@ -21,10 +21,10 @@ struct AirQualityView: View {
                             .foregroundStyle(cat.color)
                         Text("US AQI")
                             .font(Theme.label(11))
-                            .foregroundStyle(Color.auroraTertiary)
+                            .foregroundStyle(Color.welkinTertiary)
                         Text(cat.guidance)
                             .font(Theme.body(13))
-                            .foregroundStyle(Color.auroraSecondary)
+                            .foregroundStyle(Color.welkinSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -46,10 +46,10 @@ struct AirQualityView: View {
                             VStack(spacing: 4) {
                                 Text(name)
                                     .font(Theme.label(11))
-                                    .foregroundStyle(Color.auroraTertiary)
+                                    .foregroundStyle(Color.welkinTertiary)
                                 Text(value)
                                     .font(Theme.body(13))
-                                    .foregroundStyle(Color.auroraPrimary)
+                                    .foregroundStyle(Color.welkinPrimary)
                             }
                             .frame(maxWidth: .infinity)
                         }
@@ -79,10 +79,10 @@ private struct AQIGauge: View {
             VStack(spacing: 0) {
                 Text("\(category.value)")
                     .font(Theme.display(30))
-                    .foregroundStyle(Color.auroraPrimary)
+                    .foregroundStyle(Color.welkinPrimary)
                 Text("AQI")
                     .font(Theme.label(10))
-                    .foregroundStyle(Color.auroraTertiary)
+                    .foregroundStyle(Color.welkinTertiary)
             }
         }
     }

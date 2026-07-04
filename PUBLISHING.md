@@ -1,4 +1,4 @@
-# Publishing Aurora to the App Store
+# Publishing Welkin to the App Store
 
 A step-by-step guide, tailored to this project. Budget ~1–2 hours for the first
 submission, plus Apple's review time (usually 24–48h).
@@ -11,9 +11,9 @@ submission, plus Apple's review time (usually 24–48h).
 - **Apple Developer Program membership** — $99/year. Enroll at
   <https://developer.apple.com/programs/>. You cannot ship to the App Store
   without this (a free account only allows on-device testing).
-- **A unique Bundle ID.** This project currently uses `com.aurora.weather.*`,
+- **A unique Bundle ID.** This project currently uses `com.welkin.weather.*`,
   which you almost certainly don't own. Pick a reverse-DNS prefix you control,
-  e.g. `com.jeremylastname.aurora`. See step 1.
+  e.g. `com.jeremylastname.welkin`. See step 1.
 
 ---
 
@@ -23,16 +23,16 @@ The IDs appear in **four** places — change all of them consistently:
 
 1. `project.yml`
    - `options.bundleIdPrefix: com.YOURNAME`
-   - app `PRODUCT_BUNDLE_IDENTIFIER: com.YOURNAME.aurora`
-   - widget `PRODUCT_BUNDLE_IDENTIFIER: com.YOURNAME.aurora.AuroraWidget`
+   - app `PRODUCT_BUNDLE_IDENTIFIER: com.YOURNAME.welkin`
+   - widget `PRODUCT_BUNDLE_IDENTIFIER: com.YOURNAME.welkin.WelkinWidget`
      (the widget ID **must** be prefixed by the app ID)
    - set `DEVELOPMENT_TEAM: ABCDE12345` (your 10-char Team ID from
      <https://developer.apple.com/account> → Membership)
-2. `Resources/Aurora.entitlements` — the App Group string
-3. `Widget/AuroraWidget.entitlements` — the same App Group string
-4. `Sources/Shared/SharedStore.swift` — `static let appGroup = "group.com.YOURNAME.aurora"`
+2. `Resources/Welkin.entitlements` — the App Group string
+3. `Widget/WelkinWidget.entitlements` — the same App Group string
+4. `Sources/Shared/SharedStore.swift` — `static let appGroup = "group.com.YOURNAME.welkin"`
 
-Use a matching App Group id, e.g. `group.com.YOURNAME.aurora`. Then regenerate:
+Use a matching App Group id, e.g. `group.com.YOURNAME.welkin`. Then regenerate:
 
 ```sh
 xcodegen generate
@@ -43,10 +43,10 @@ xcodegen generate
 ## 2. Let Xcode register the identifiers & App Group
 
 ```sh
-open Aurora.xcodeproj
+open Welkin.xcodeproj
 ```
 
-For **each** target (Aurora and AuroraWidgetExtension):
+For **each** target (Welkin and WelkinWidgetExtension):
 - Select the target → **Signing & Capabilities**
 - Check **Automatically manage signing**, choose your **Team**
 - Xcode will register the App IDs and the App Group on the developer portal for
@@ -73,9 +73,9 @@ If you prefer to do it by hand, create the two App IDs and the App Group at
 Go to <https://appstoreconnect.apple.com> → **Apps** → **+** → **New App**:
 
 - **Platform:** iOS
-- **Name:** Aurora (must be globally unique — have a backup name ready)
+- **Name:** Welkin (must be globally unique — have a backup name ready)
 - **Primary language**, **Bundle ID** (pick the app ID from step 2), **SKU** (any
-  unique string, e.g. `aurora-001`)
+  unique string, e.g. `welkin-001`)
 - **Category:** Weather
 
 Then fill in, under the version:
@@ -97,7 +97,7 @@ Then fill in, under the version:
 - **App Privacy "nutrition label"** (App Store Connect → your app → **App
   Privacy**): declare that you collect **Location (Precise or Coarse)** used for
   **App Functionality**, **not linked** to the user's identity, **not used for
-  tracking**. Aurora sends coordinates to Open-Meteo only to fetch weather; it has
+  tracking**. Welkin sends coordinates to Open-Meteo only to fetch weather; it has
   no accounts, ads, or analytics, so everything else is "No".
 - **Privacy Policy URL** is required. Host a short policy stating the app sends
   location to Open-Meteo to retrieve weather and stores nothing personal.
@@ -106,7 +106,7 @@ Then fill in, under the version:
 
 ## 6. ⚠️ Weather data licensing (read this)
 
-Aurora uses **Open-Meteo**. Two things matter for the store:
+Welkin uses **Open-Meteo**. Two things matter for the store:
 
 1. **Attribution.** Open-Meteo data is CC-BY 4.0 — the app already shows
    "Data from Open-Meteo". Keep it.
@@ -122,7 +122,7 @@ Aurora uses **Open-Meteo**. Two things matter for the store:
 ## 7. Archive & upload
 
 In Xcode:
-1. Select the **Aurora** scheme and the **Any iOS Device (arm64)** destination
+1. Select the **Welkin** scheme and the **Any iOS Device (arm64)** destination
    (not a simulator).
 2. **Product → Archive**.
 3. When the Organizer opens: **Distribute App → App Store Connect → Upload**.
@@ -130,9 +130,9 @@ In Xcode:
 
 Command-line alternative:
 ```sh
-xcodebuild -project Aurora.xcodeproj -scheme Aurora \
-  -destination 'generic/platform=iOS' -archivePath build/Aurora.xcarchive archive
-xcodebuild -exportArchive -archivePath build/Aurora.xcarchive \
+xcodebuild -project Welkin.xcodeproj -scheme Welkin \
+  -destination 'generic/platform=iOS' -archivePath build/Welkin.xcarchive archive
+xcodebuild -exportArchive -archivePath build/Welkin.xcarchive \
   -exportOptionsPlist ExportOptions.plist -exportPath build/export
 # then upload build/export/*.ipa with `xcrun altool` or Transporter
 ```

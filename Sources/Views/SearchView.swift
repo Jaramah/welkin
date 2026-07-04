@@ -24,7 +24,7 @@ struct SearchView: View {
                     } label: {
                         Label("Use Current Location", systemImage: "location.fill")
                             .font(Theme.body(16))
-                            .foregroundStyle(Color.auroraPrimary)
+                            .foregroundStyle(Color.welkinPrimary)
                     }
                     .listRowBackground(Color.white.opacity(0.06))
 
@@ -40,11 +40,11 @@ struct SearchView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(place.name)
                                     .font(Theme.body(16))
-                                    .foregroundStyle(Color.auroraPrimary)
+                                    .foregroundStyle(Color.welkinPrimary)
                                 if !place.subtitle.isEmpty {
                                     Text(place.subtitle)
                                         .font(Theme.body(13))
-                                        .foregroundStyle(Color.auroraSecondary)
+                                        .foregroundStyle(Color.welkinSecondary)
                                 }
                             }
                         }

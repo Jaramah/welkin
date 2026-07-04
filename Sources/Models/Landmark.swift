@@ -1,6 +1,6 @@
 import Foundation
 
-/// A city's signature landmark — the thing that makes Aurora feel local.
+/// A city's signature landmark — the thing that makes Welkin feel local.
 enum LandmarkKind: Sendable, CaseIterable {
     // Original set
     case statueOfLiberty, eiffelTower, tokyoTower, bigBen, goldenGate, spaceNeedle

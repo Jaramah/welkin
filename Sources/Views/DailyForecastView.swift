@@ -43,7 +43,7 @@ private struct DayRow: View {
             HStack(spacing: 12) {
                 Text(isToday ? "Today" : dayName(day.date))
                     .font(Theme.body(16))
-                    .foregroundStyle(Color.auroraPrimary)
+                    .foregroundStyle(Color.welkinPrimary)
                     .frame(width: 58, alignment: .leading)
 
                 Image(systemName: day.code.symbol)
@@ -61,7 +61,7 @@ private struct DayRow: View {
 
                 Text("\(Int(day.low.rounded()))°")
                     .font(Theme.body(16))
-                    .foregroundStyle(Color.auroraTertiary)
+                    .foregroundStyle(Color.welkinTertiary)
                     .lineLimit(1)
                     .frame(width: 38, alignment: .trailing)
 
@@ -71,7 +71,7 @@ private struct DayRow: View {
 
                 Text("\(Int(day.high.rounded()))°")
                     .font(Theme.body(16))
-                    .foregroundStyle(Color.auroraPrimary)
+                    .foregroundStyle(Color.welkinPrimary)
                     .lineLimit(1)
                     .frame(width: 38, alignment: .leading)
             }

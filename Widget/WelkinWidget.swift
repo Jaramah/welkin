@@ -6,15 +6,15 @@ import SwiftUI
 /// Transfers a non-Sendable completion handler into a Task under Swift 6.
 private struct Sendify<T>: @unchecked Sendable { let value: T }
 
-struct AuroraProvider: TimelineProvider {
-    func placeholder(in context: Context) -> AuroraEntry { .placeholder }
+struct WelkinProvider: TimelineProvider {
+    func placeholder(in context: Context) -> WelkinEntry { .placeholder }
 
-    func getSnapshot(in context: Context, completion: @escaping (AuroraEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping (WelkinEntry) -> Void) {
         let sink = Sendify(value: completion)
         Task { sink.value(await fetchEntry()) }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<AuroraEntry>) -> Void) {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<WelkinEntry>) -> Void) {
         let sink = Sendify(value: completion)
         Task {
             let entry = await fetchEntry()
@@ -24,7 +24,7 @@ struct AuroraProvider: TimelineProvider {
         }
     }
 
-    private func fetchEntry() async -> AuroraEntry {
+    private func fetchEntry() async -> WelkinEntry {
         let stored = SharedStore.loadPlace()
         let place = Place(
             name: stored?.name ?? "New York",
@@ -34,10 +34,10 @@ struct AuroraProvider: TimelineProvider {
         let unit = TemperatureUnit(rawValue: SharedStore.loadUnit()) ?? .fahrenheit
 
         guard let bundle = try? await WeatherService().fetch(for: place, unit: unit) else {
-            return AuroraEntry.placeholder
+            return WelkinEntry.placeholder
         }
         let c = bundle.current
-        return AuroraEntry(
+        return WelkinEntry(
             date: .now,
             placeName: bundle.place.name,
             landmark: LandmarkCatalog.landmark(for: bundle.place),
@@ -56,14 +56,14 @@ struct AuroraProvider: TimelineProvider {
 
 // MARK: - Widget definitions
 
-struct AuroraWidget: Widget {
-    let kind = "AuroraWidget"
+struct WelkinWidget: Widget {
+    let kind = "WelkinWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: AuroraProvider()) { entry in
-            AuroraWidgetView(entry: entry)
+        StaticConfiguration(kind: kind, provider: WelkinProvider()) { entry in
+            WelkinWidgetView(entry: entry)
         }
-        .configurationDisplayName("Aurora Weather")
+        .configurationDisplayName("Welkin Weather")
         .description("Your city's weather under its signature landmark.")
         .supportedFamilies([.systemSmall, .systemMedium,
                             .accessoryRectangular, .accessoryCircular, .accessoryInline])
@@ -71,8 +71,8 @@ struct AuroraWidget: Widget {
 }
 
 @main
-struct AuroraWidgetBundle: WidgetBundle {
+struct WelkinWidgetBundle: WidgetBundle {
     var body: some Widget {
-        AuroraWidget()
+        WelkinWidget()
     }
 }

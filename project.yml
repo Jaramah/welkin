@@ -1,4 +1,4 @@
-name: Aurora
+name: Welkin
 options:
   bundleIdPrefix: com.github.jaramah
   deploymentTarget:
@@ -13,7 +13,7 @@ settings:
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 targets:
-  Aurora:
+  Welkin:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
@@ -21,30 +21,30 @@ targets:
       - Sources
       - Resources
     dependencies:
-      - target: AuroraWidgetExtension
+      - target: WelkinWidgetExtension
     info:
       path: Resources/Info.plist
       properties:
-        CFBundleDisplayName: Aurora
+        CFBundleDisplayName: Welkin
         UILaunchScreen:
           UIColorName: ""
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        NSLocationWhenInUseUsageDescription: "Aurora uses your location to show local weather and air quality."
+        NSLocationWhenInUseUsageDescription: "Welkin uses your location to show local weather and air quality."
         UIStatusBarStyle: UIStatusBarStyleLightContent
         UIViewControllerBasedStatusBarAppearance: false
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.github.jaramah.Aurora
+        PRODUCT_BUNDLE_IDENTIFIER: com.github.jaramah.Welkin
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1"
-        CODE_SIGN_ENTITLEMENTS: Resources/Aurora.entitlements
+        CODE_SIGN_ENTITLEMENTS: Resources/Welkin.entitlements
 
-  AuroraWidgetExtension:
+  WelkinWidgetExtension:
     type: app-extension
     platform: iOS
     deploymentTarget: "18.0"
@@ -62,12 +62,12 @@ targets:
     info:
       path: Widget/Info.plist
       properties:
-        CFBundleDisplayName: Aurora
+        CFBundleDisplayName: Welkin
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.github.jaramah.Aurora.AuroraWidget
+        PRODUCT_BUNDLE_IDENTIFIER: com.github.jaramah.Welkin.WelkinWidget
         GENERATE_INFOPLIST_FILE: NO
-        CODE_SIGN_ENTITLEMENTS: Widget/AuroraWidget.entitlements
+        CODE_SIGN_ENTITLEMENTS: Widget/WelkinWidget.entitlements
         TARGETED_DEVICE_FAMILY: "1"

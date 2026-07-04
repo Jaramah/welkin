@@ -79,7 +79,7 @@ struct ContentView: View {
 
                 Text("Data from Open-Meteo")
                     .font(Theme.label(11))
-                    .foregroundStyle(Color.auroraTertiary)
+                    .foregroundStyle(Color.welkinTertiary)
                     .padding(.top, 4)
                     .padding(.bottom, 30)
             }
@@ -138,7 +138,7 @@ private struct LoadingView: View {
             ProgressView().controlSize(.large).tint(.white)
             Text("Reading the skies…")
                 .font(Theme.body(15))
-                .foregroundStyle(Color.auroraSecondary)
+                .foregroundStyle(Color.welkinSecondary)
         }
     }
 }
@@ -151,10 +151,10 @@ private struct ErrorView: View {
         VStack(spacing: 18) {
             Image(systemName: "cloud.rain.fill")
                 .font(.system(size: 44))
-                .foregroundStyle(Color.auroraSecondary)
+                .foregroundStyle(Color.welkinSecondary)
             Text(message)
                 .font(Theme.body(16))
-                .foregroundStyle(Color.auroraPrimary)
+                .foregroundStyle(Color.welkinPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             Button(action: retry) {

@@ -13,12 +13,12 @@ struct CurrentWeatherView: View {
             // Temperature + condition sit above the landmark.
             Text(tempString(current.temperature))
                 .font(Theme.display(88))
-                .foregroundStyle(Color.auroraPrimary)
+                .foregroundStyle(Color.welkinPrimary)
                 .contentTransition(.numericText())
 
             Text(current.code.label)
                 .font(Theme.body(17))
-                .foregroundStyle(Color.auroraSecondary)
+                .foregroundStyle(Color.welkinSecondary)
 
             HStack(spacing: 16) {
                 Text("H:\(tempString(current.high))")
@@ -26,7 +26,7 @@ struct CurrentWeatherView: View {
                 Text("Feels \(tempString(current.apparentTemperature))")
             }
             .font(Theme.body(15))
-            .foregroundStyle(Color.auroraSecondary)
+            .foregroundStyle(Color.welkinSecondary)
             .padding(.bottom, 6)
 
             // Signature landmark scene — the city's icon under live weather.
@@ -42,14 +42,14 @@ struct CurrentWeatherView: View {
             // Location sits below the landmark.
             Text(place.name)
                 .font(Theme.title(24))
-                .foregroundStyle(Color.auroraPrimary)
+                .foregroundStyle(Color.welkinPrimary)
                 .lineLimit(1)
                 .padding(.top, 8)
 
             Label(landmark.name, systemImage: "mappin.and.ellipse")
                 .font(Theme.label(11))
                 .tracking(1)
-                .foregroundStyle(Color.auroraTertiary)
+                .foregroundStyle(Color.welkinTertiary)
 
             // Local delicacy to try — inline, no card.
             LocalFlavorView(place: place)
