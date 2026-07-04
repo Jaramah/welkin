@@ -5,31 +5,36 @@ struct WeatherEffects: View {
     let code: WeatherCode
     let sky: SkyMood
 
-    enum Precip { case none, drizzle, rain, heavyRain, storm, snow }
+    enum Effect { case none, sunny, fog, drizzle, rain, heavyRain, storm, snow, stars }
 
     var body: some View {
         ZStack {
-            switch resolvedPrecip {
+            switch resolvedEffect {
+            case .sunny:     SunnyCanvas()
+            case .fog:       FogCanvas()
             case .drizzle:   RainCanvas(spec: .drizzle)
             case .rain:      RainCanvas(spec: .rain)
             case .heavyRain: RainCanvas(spec: .heavy)
             case .storm:     RainCanvas(spec: .heavy); LightningFlash()
             case .snow:      SnowCanvas()
-            case .none:
-                if sky == .clearNight || sky == .partlyNight { StarCanvas() }
+            case .stars:     StarCanvas()
+            case .none:      EmptyView()
             }
         }
         .allowsHitTesting(false)
     }
 
-    private var resolvedPrecip: Precip {
+    private var resolvedEffect: Effect {
         switch code.raw {
+        case 45, 48:                        return .fog
         case 51, 53, 55, 56, 57:            return .drizzle
         case 61, 63, 80, 81:                return .rain
         case 65, 66, 67, 82:                return .heavyRain
         case 71, 73, 75, 77, 85, 86:        return .snow
         case 95, 96, 99:                    return .storm
-        default:                            return .none
+        case 0, 1:                          return code.isDay ? .sunny : .stars
+        default:
+            return (sky == .clearNight || sky == .partlyNight) ? .stars : .none
         }
     }
 }
@@ -143,6 +148,73 @@ private struct StarCanvas: View {
                     let rectF = CGRect(x: s.x * size.width - s.r, y: s.y * size.height - s.r,
                                        width: s.r * 2, height: s.r * 2)
                     ctx.fill(Path(ellipseIn: rectF), with: .color(.white.opacity(twinkle)))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Sun (soft light motes drifting up through bright air)
+
+private struct SunnyCanvas: View {
+    private let motes: [(x: Double, y: Double, r: Double, phase: Double, speed: Double)]
+
+    init() {
+        var rng = LCG(state: 314)
+        motes = (0..<20).map { _ in
+            (rng.next(), rng.next(), 8 + rng.next() * 20, rng.next() * 6.28, 0.015 + rng.next() * 0.025)
+        }
+    }
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            Canvas { ctx, size in
+                let warm = Color(red: 1.0, green: 0.95, blue: 0.78)
+                for m in motes {
+                    let yy = ((m.y - t * m.speed).truncatingRemainder(dividingBy: 1) + 1)
+                        .truncatingRemainder(dividingBy: 1)
+                    let x = (m.x + sin(t * 0.3 + m.phase) * 0.02) * size.width
+                    let y = yy * size.height
+                    let op = 0.05 + 0.09 * (0.5 + 0.5 * sin(t * 0.9 + m.phase))
+                    let rect = CGRect(x: x - m.r, y: y - m.r, width: m.r * 2, height: m.r * 2)
+                    ctx.fill(Path(ellipseIn: rect),
+                             with: .radialGradient(Gradient(colors: [warm.opacity(op), warm.opacity(0)]),
+                                                   center: CGPoint(x: x, y: y), startRadius: 0, endRadius: m.r))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Fog (soft mist banks drifting horizontally)
+
+private struct FogCanvas: View {
+    private let banks: [(y: Double, r: Double, phase: Double, speed: Double, op: Double)]
+
+    init() {
+        var rng = LCG(state: 99)
+        banks = (0..<6).map { _ in
+            (0.12 + rng.next() * 0.76, 0.36 + rng.next() * 0.26, rng.next(),
+             (rng.next() < 0.5 ? -1 : 1) * (0.012 + rng.next() * 0.02), 0.10 + rng.next() * 0.12)
+        }
+    }
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            Canvas { ctx, size in
+                for b in banks {
+                    let raw = (b.phase + t * b.speed).truncatingRemainder(dividingBy: 1)
+                    let frac = (raw + 1).truncatingRemainder(dividingBy: 1)
+                    let cx = (frac * 1.5 - 0.25) * size.width
+                    let cy = b.y * size.height
+                    let rx = b.r * size.width
+                    let ry = rx * 0.42
+                    let rect = CGRect(x: cx - rx, y: cy - ry, width: rx * 2, height: ry * 2)
+                    ctx.fill(Path(ellipseIn: rect),
+                             with: .radialGradient(Gradient(colors: [Color.white.opacity(b.op), Color.white.opacity(0)]),
+                                                   center: CGPoint(x: cx, y: cy), startRadius: 0, endRadius: rx))
                 }
             }
         }
