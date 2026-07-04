@@ -13,6 +13,12 @@ struct ContentView: View {
         ZStack {
             AnimatedBackground(mood: mood)
 
+            // Full-screen weather that matches the location: rain, snow, storms, stars.
+            if let bundle = viewModel.bundle {
+                WeatherEffects(code: bundle.current.code, sky: bundle.current.code.sky)
+                    .ignoresSafeArea()
+            }
+
             switch viewModel.phase {
             case .idle, .loading:
                 LoadingView()

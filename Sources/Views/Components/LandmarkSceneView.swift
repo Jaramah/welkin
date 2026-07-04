@@ -30,16 +30,6 @@ struct LandmarkSceneView: View {
                         .offset(y: bg)
                 }
 
-                // Stars / precipitation — mid layer
-                WeatherEffects(code: code, sky: sky)
-                    .offset(y: bg * 0.55)
-
-                // Ground gradient the landmark rises from
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.18), .black.opacity(0.38)],
-                    startPoint: .center, endPoint: .bottom
-                )
-
                 // The landmark silhouette — foreground layer
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
