@@ -69,6 +69,8 @@ struct ContentView: View {
                                    ozone: bundle.ozone, no2: bundle.no2)
                 }
 
+                LocalFlavorView(place: bundle.place)
+
                 DetailGridView(current: bundle.current, unit: viewModel.unit, timezone: timezone)
 
                 Text("Data from Open-Meteo")

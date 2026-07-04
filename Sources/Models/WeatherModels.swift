@@ -59,6 +59,8 @@ struct DayPoint: Identifiable, Sendable {
     let uvIndex: Double
     let code: WeatherCode
     let aqi: Int?
+    let rainStart: Date?     // first hour with measurable precip that day
+    let rainEnd: Date?       // end of the last hour with measurable precip
 }
 
 /// Everything the UI needs, composed by the service.

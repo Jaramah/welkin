@@ -39,7 +39,7 @@ struct WeatherService {
             .init(name: "latitude", value: String(place.latitude)),
             .init(name: "longitude", value: String(place.longitude)),
             .init(name: "current", value: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,cloud_cover"),
-            .init(name: "hourly", value: "temperature_2m,precipitation_probability,weather_code,is_day"),
+            .init(name: "hourly", value: "temperature_2m,precipitation_probability,precipitation,weather_code,is_day"),
             .init(name: "daily", value: "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max"),
             .init(name: "temperature_unit", value: unit.apiValue),
             .init(name: "wind_speed_unit", value: unit.windUnit),
@@ -122,9 +122,11 @@ struct WeatherService {
         let d = forecast.daily
         var days: [DayPoint] = []
         let aqiDaily = dailyMaxAQI(from: air, timezone: tz)
+        let rainWindows = rainWindows(from: forecast.hourly, parse: parse, timezone: tz)
         for i in d.time.indices {
             let dayDate = localParser.date(from: d.time[i] + "T00:00") ?? Date()
             let dCode = WeatherCode(raw: d.weather_code[i], isDay: true)
+            let window = rainWindows[Self.dayKey(dayDate, tz: tz)]
             days.append(DayPoint(
                 date: dayDate,
                 high: d.temperature_2m_max[i],
@@ -132,7 +134,9 @@ struct WeatherService {
                 precipitationProbability: d.precipitation_probability_max?[safe: i].flatMap { $0 } ?? 0,
                 uvIndex: d.uv_index_max?[safe: i].flatMap { $0 } ?? 0,
                 code: dCode,
-                aqi: aqiDaily[Self.dayKey(dayDate, tz: tz)]
+                aqi: aqiDaily[Self.dayKey(dayDate, tz: tz)],
+                rainStart: window?.start,
+                rainEnd: window?.end
             ))
         }
 
@@ -182,6 +186,26 @@ struct WeatherService {
             ozone: air.current?.ozone,
             no2: air.current?.nitrogen_dioxide
         )
+    }
+
+    /// For each day, find the first and last hour with measurable precipitation.
+    private func rainWindows(from hourly: ForecastResponse.Hourly,
+                             parse: (String?) -> Date?,
+                             timezone tz: TimeZone) -> [String: (start: Date, end: Date)] {
+        guard let precip = hourly.precipitation else { return [:] }
+        var result: [String: (start: Date, end: Date)] = [:]
+        for i in hourly.time.indices {
+            guard let mm = precip[safe: i].flatMap({ $0 }), mm >= 0.1,
+                  let date = parse(hourly.time[i]) else { continue }
+            let key = Self.dayKey(date, tz: tz)
+            let hourEnd = date.addingTimeInterval(3600)
+            if let existing = result[key] {
+                result[key] = (min(existing.start, date), max(existing.end, hourEnd))
+            } else {
+                result[key] = (date, hourEnd)
+            }
+        }
+        return result
     }
 
     /// Aggregate hourly US AQI into a per-day maximum keyed by yyyy-MM-dd.

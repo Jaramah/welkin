@@ -26,6 +26,7 @@ struct ForecastResponse: Decodable, Sendable {
         let time: [String]
         let temperature_2m: [Double]
         let precipitation_probability: [Int?]?
+        let precipitation: [Double?]?
         let weather_code: [Int]
         let is_day: [Int?]?
     }

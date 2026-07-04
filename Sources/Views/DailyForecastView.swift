@@ -34,41 +34,60 @@ private struct DayRow: View {
     let globalLow: Double
     let globalHigh: Double
 
+    private var showsRain: Bool {
+        day.precipitationProbability >= 20 || day.rainStart != nil
+    }
+
     var body: some View {
-        HStack(spacing: 12) {
-            Text(isToday ? "Today" : dayName(day.date))
-                .font(Theme.body(16))
-                .foregroundStyle(Color.auroraPrimary)
-                .frame(width: 58, alignment: .leading)
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 12) {
+                Text(isToday ? "Today" : dayName(day.date))
+                    .font(Theme.body(16))
+                    .foregroundStyle(Color.auroraPrimary)
+                    .frame(width: 58, alignment: .leading)
 
-            Image(systemName: day.code.symbol)
-                .symbolRenderingMode(.multicolor)
-                .font(.system(size: 20))
-                .frame(width: 30)
+                Image(systemName: day.code.symbol)
+                    .symbolRenderingMode(.multicolor)
+                    .font(.system(size: 20))
+                    .frame(width: 30)
 
-            if let aqi = day.aqi {
-                AQIPill(aqi: aqi)
-            } else {
-                Spacer().frame(width: 44)
+                if let aqi = day.aqi {
+                    AQIPill(aqi: aqi)
+                } else {
+                    Spacer().frame(width: 44)
+                }
+
+                Spacer(minLength: 6)
+
+                Text("\(Int(day.low.rounded()))°")
+                    .font(Theme.body(16))
+                    .foregroundStyle(Color.auroraTertiary)
+                    .lineLimit(1)
+                    .frame(width: 38, alignment: .trailing)
+
+                TemperatureBar(low: day.low, high: day.high,
+                               globalLow: globalLow, globalHigh: globalHigh)
+                    .frame(width: 62, height: 5)
+
+                Text("\(Int(day.high.rounded()))°")
+                    .font(Theme.body(16))
+                    .foregroundStyle(Color.auroraPrimary)
+                    .lineLimit(1)
+                    .frame(width: 38, alignment: .leading)
             }
 
-            Spacer(minLength: 6)
-
-            Text("\(Int(day.low.rounded()))°")
-                .font(Theme.body(16))
-                .foregroundStyle(Color.auroraTertiary)
-                .lineLimit(1)
-                .frame(width: 38, alignment: .trailing)
-
-            TemperatureBar(low: day.low, high: day.high,
-                           globalLow: globalLow, globalHigh: globalHigh)
-                .frame(width: 62, height: 5)
-
-            Text("\(Int(day.high.rounded()))°")
-                .font(Theme.body(16))
-                .foregroundStyle(Color.auroraPrimary)
-                .lineLimit(1)
-                .frame(width: 38, alignment: .leading)
+            if showsRain {
+                HStack(spacing: 6) {
+                    Image(systemName: "drop.fill").font(.system(size: 10))
+                    Text("\(day.precipitationProbability)%")
+                    if let start = day.rainStart, let end = day.rainEnd {
+                        Text("· rain \(hour(start))–\(hour(end))")
+                    }
+                }
+                .font(Theme.label(11))
+                .foregroundStyle(Color(red: 0.5, green: 0.8, blue: 1.0))
+                .padding(.leading, 58)
+            }
         }
         .padding(.vertical, 6)
     }
@@ -78,6 +97,13 @@ private struct DayRow: View {
         f.timeZone = timezone
         f.dateFormat = "EEE"
         return f.string(from: date)
+    }
+
+    private func hour(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.timeZone = timezone
+        f.dateFormat = "ha"
+        return f.string(from: date).lowercased()
     }
 }
 

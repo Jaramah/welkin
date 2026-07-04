@@ -25,8 +25,11 @@ time-of-day-adaptive animated `MeshGradient` background with glassmorphism cards
   an App Group; they refresh ~hourly.
 - **Now** — big current temperature, condition, high/low, and "feels like"
 - **Hourly** — next 24 hours (temperature, condition, precipitation chance)
-- **7-day forecast** — highs/lows on a range bar, condition, precip, and a
-  color-coded **US AQI** pill per day
+- **7-day forecast** — highs/lows on a range bar, condition, a color-coded
+  **US AQI** pill per day, plus **rain probability and the exact window**
+  ("💧 67% · rain 12pm–5pm"), derived from hourly precipitation
+- **Local Flavor** — a daily-rotating local delicacy to try in your city
+  (Singapore → Chilli Crab, Tokyo → Ramen, …), curated for ~50 cities
 - **Air Quality** — animated AQI gauge, health guidance, and pollutant
   breakdown (PM2.5, PM10, ozone, NO₂)
 - **Detail tiles** — UV index, humidity, wind, pressure, feels-like, sunrise/sunset

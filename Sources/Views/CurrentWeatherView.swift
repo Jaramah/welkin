@@ -10,26 +10,7 @@ struct CurrentWeatherView: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(place.name)
-                .font(Theme.title(24))
-                .foregroundStyle(Color.auroraPrimary)
-                .lineLimit(1)
-
-            Label(landmark.name, systemImage: "mappin.and.ellipse")
-                .font(Theme.label(11))
-                .tracking(1)
-                .foregroundStyle(Color.auroraTertiary)
-                .padding(.bottom, 2)
-
-            // Signature landmark scene — the city's icon under live weather.
-            LandmarkSceneView(
-                landmark: landmark,
-                code: current.code,
-                sky: current.code.sky,
-                sunrise: current.sunrise,
-                sunset: current.sunset,
-                scrollOffset: scrollOffset
-            )
+            // Temperature + condition sit above the landmark.
             Text(tempString(current.temperature))
                 .font(Theme.display(88))
                 .foregroundStyle(Color.auroraPrimary)
@@ -46,6 +27,29 @@ struct CurrentWeatherView: View {
             }
             .font(Theme.body(15))
             .foregroundStyle(Color.auroraSecondary)
+            .padding(.bottom, 6)
+
+            // Signature landmark scene — the city's icon under live weather.
+            LandmarkSceneView(
+                landmark: landmark,
+                code: current.code,
+                sky: current.code.sky,
+                sunrise: current.sunrise,
+                sunset: current.sunset,
+                scrollOffset: scrollOffset
+            )
+
+            // Location sits below the landmark.
+            Text(place.name)
+                .font(Theme.title(24))
+                .foregroundStyle(Color.auroraPrimary)
+                .lineLimit(1)
+                .padding(.top, 8)
+
+            Label(landmark.name, systemImage: "mappin.and.ellipse")
+                .font(Theme.label(11))
+                .tracking(1)
+                .foregroundStyle(Color.auroraTertiary)
         }
         .frame(maxWidth: .infinity)
     }
