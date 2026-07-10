@@ -37,6 +37,20 @@ platform :ios do
     # Welkin.xcodeproj is generated from project.yml — regenerate it before building.
     Dir.chdir("..") { sh("xcodegen", "generate") }
 
+    widget_identifier = "#{APP_IDENTIFIER}.WelkinWidget"
+
+    # Create/download App Store provisioning profiles for the app and the widget,
+    # using the same API key. Export can't be left to Xcode's cloud signing (the
+    # key's role can't do it), so we hand it an explicit profile mapping instead.
+    app_profile = get_provisioning_profile(
+      api_key: api_key, app_identifier: APP_IDENTIFIER,
+      provisioning_name: "Welkin CI App Store", force: true
+    )
+    widget_profile = get_provisioning_profile(
+      api_key: api_key, app_identifier: widget_identifier,
+      provisioning_name: "Welkin Widget CI App Store", force: true
+    )
+
     # Next build number = whatever is already on TestFlight + 1, so uploads never
     # collide. Applied to both the app and the widget via a build-setting override.
     next_build = latest_testflight_build_number(
@@ -49,8 +63,6 @@ platform :ios do
       project: "Welkin.xcodeproj",
       scheme: "Welkin",
       export_method: "app-store",
-      # Let Xcode fetch/create the provisioning profiles on the fly, authenticated
-      # with the same API key, and stamp the computed build number.
       xcargs: [
         "-allowProvisioningUpdates",
         "-authenticationKeyPath", key_path,
@@ -58,7 +70,16 @@ platform :ios do
         "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID"),
         "CURRENT_PROJECT_VERSION=#{next_build}"
       ].join(" "),
-      export_options: { signingStyle: "automatic" }
+      # Manual signing at export with the profiles we just created — this is what
+      # avoids the "Cloud signing permission error".
+      export_options: {
+        signingStyle: "manual",
+        teamID: "V5LHDBRQYB",
+        provisioningProfiles: {
+          APP_IDENTIFIER => app_profile,
+          widget_identifier => widget_profile
+        }
+      }
     )
 
     upload_to_testflight(
