@@ -20,7 +20,10 @@ final class WeatherViewModel {
     }
 
     private(set) var currentPlace: Place?
+    /// Singapore-only area nowcast (nil elsewhere or while unavailable).
+    private(set) var regionalNowcast: RegionalNowcast?
     private let service = WeatherService()
+    private let nea = NEAService()
     private let location = LocationManager()
 
     var bundle: WeatherBundle? {
@@ -42,6 +45,7 @@ final class WeatherViewModel {
         do {
             let bundle = try await service.fetch(for: place, unit: unit)
             phase = .loaded(bundle)
+            loadRegionalNowcast(for: place)
             // Hand the current location + unit to the widget and refresh it.
             SharedStore.save(place: StoredPlace(name: place.name,
                                                 latitude: place.latitude,
@@ -50,6 +54,22 @@ final class WeatherViewModel {
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
             phase = .failed(error.localizedDescription)
+        }
+    }
+
+    /// Best-effort area nowcast, only where NEA has coverage (Singapore).
+    /// Keeps any existing data visible until fresh data arrives; clears it
+    /// immediately when the new location is outside coverage.
+    private func loadRegionalNowcast(for place: Place) {
+        guard NEAService.covers(latitude: place.latitude, longitude: place.longitude) else {
+            regionalNowcast = nil
+            return
+        }
+        Task { [weak self] in
+            guard let self else { return }
+            if let nowcast = try? await self.nea.twoHourNowcast() {
+                self.regionalNowcast = nowcast
+            }
         }
     }
 

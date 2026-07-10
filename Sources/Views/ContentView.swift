@@ -74,6 +74,10 @@ struct ContentView: View {
                     DailyForecastView(days: bundle.daily, timezone: timezone)
                 }
 
+                if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
+                    RegionalNowcastView(nowcast: nowcast)
+                }
+
                 if let aqi = bundle.aqiNow {
                     AirQualityView(aqi: aqi, pm25: bundle.pm25, pm10: bundle.pm10,
                                    ozone: bundle.ozone, no2: bundle.no2)
