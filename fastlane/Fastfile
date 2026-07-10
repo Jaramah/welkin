@@ -7,9 +7,9 @@ platform :ios do
   lane :beta do
     # On CI, create a fresh throwaway keychain to hold signing assets.
     setup_ci
+    require "base64"
 
     # Materialize the App Store Connect API key (.p8) from the base64 secret.
-    require "base64"
     key_path = File.absolute_path("AuthKey.p8")
     File.write(key_path, Base64.decode64(ENV.fetch("ASC_KEY_CONTENT")))
 
@@ -17,6 +17,21 @@ platform :ios do
       key_id: ENV.fetch("ASC_KEY_ID"),
       issuer_id: ENV.fetch("ASC_ISSUER_ID"),
       key_filepath: key_path
+    )
+
+    # Import the existing App Store distribution certificate (with its private
+    # key) into the CI keychain. The account's distribution cert was created on
+    # the user's Mac; without its private key here, export can't sign for the
+    # App Store and Xcode falls back to cloud signing, which the API key's role
+    # isn't allowed to do ("Cloud signing permission error"). With the cert
+    # present, -allowProvisioningUpdates only needs to fetch the profiles.
+    cert_path = File.absolute_path("dist_cert.p12")
+    File.write(cert_path, Base64.decode64(ENV.fetch("ASC_DIST_CERT")))
+    import_certificate(
+      certificate_path: cert_path,
+      certificate_password: ENV.fetch("ASC_DIST_CERT_PASSWORD", ""),
+      keychain_name: ENV.fetch("MATCH_KEYCHAIN_NAME", "fastlane_tmp_keychain"),
+      keychain_password: ENV.fetch("MATCH_KEYCHAIN_PASSWORD", "")
     )
 
     # Welkin.xcodeproj is generated from project.yml — regenerate it before building.
