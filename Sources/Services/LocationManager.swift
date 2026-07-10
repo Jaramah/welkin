@@ -28,6 +28,9 @@ final class LocationManager: NSObject {
             throw LocationError.denied
         }
         return try await withCheckedThrowingContinuation { cont in
+            // If a request is already in flight, fail it before replacing it —
+            // otherwise the old continuation leaks and its `await` hangs forever.
+            self.continuation?.resume(throwing: LocationError.unavailable)
             self.continuation = cont
             if status == .notDetermined {
                 manager.requestWhenInUseAuthorization()

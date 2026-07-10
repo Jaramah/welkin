@@ -35,7 +35,10 @@ final class WeatherViewModel {
 
     func load(place: Place) async {
         currentPlace = place
-        phase = .loading
+        // Only show the full-screen loader on a cold start. On a refresh or unit
+        // toggle, keep the current content visible so the screen doesn't flash
+        // (pull-to-refresh shows its own spinner).
+        if bundle == nil { phase = .loading }
         do {
             let bundle = try await service.fetch(for: place, unit: unit)
             phase = .loaded(bundle)
@@ -51,7 +54,7 @@ final class WeatherViewModel {
     }
 
     func loadCurrentLocation() async {
-        phase = .loading
+        if bundle == nil { phase = .loading }
         do {
             let coord = try await location.requestCurrentLocation()
             // Try to name the place via reverse geocoding for a nicer title.

@@ -24,18 +24,20 @@ struct ForecastResponse: Decodable, Sendable {
 
     struct Hourly: Decodable, Sendable {
         let time: [String]
-        let temperature_2m: [Double]
+        // Element types are optional: Open-Meteo can emit `null` entries
+        // (notably at the forecast horizon), which would otherwise fail decoding.
+        let temperature_2m: [Double?]
         let precipitation_probability: [Int?]?
         let precipitation: [Double?]?
-        let weather_code: [Int]
+        let weather_code: [Int?]
         let is_day: [Int?]?
     }
 
     struct Daily: Decodable, Sendable {
         let time: [String]
-        let weather_code: [Int]
-        let temperature_2m_max: [Double]
-        let temperature_2m_min: [Double]
+        let weather_code: [Int?]
+        let temperature_2m_max: [Double?]
+        let temperature_2m_min: [Double?]
         let sunrise: [String?]?
         let sunset: [String?]?
         let uv_index_max: [Double?]?

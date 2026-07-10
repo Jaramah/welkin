@@ -28,7 +28,12 @@ struct WeatherService {
     func fetch(for place: Place, unit: TemperatureUnit) async throws -> WeatherBundle {
         async let forecast = fetchForecast(place: place, unit: unit)
         async let air = fetchAirQuality(place: place)
-        return try compose(place: place, forecast: await forecast, air: await air)
+        // The forecast is essential; air quality is best-effort. AQI comes from a
+        // different host with its own uptime/limits, so a failure there must not
+        // wipe out an otherwise-healthy forecast — the AQI card degrades gracefully.
+        let forecastResult = try await forecast
+        let airResult = try? await air
+        return compose(place: place, forecast: forecastResult, air: airResult)
     }
 
     // MARK: Forecast
@@ -105,7 +110,7 @@ struct WeatherService {
 
     // MARK: Composition
 
-    private func compose(place: Place, forecast: ForecastResponse, air: AirResponse) throws -> WeatherBundle {
+    private func compose(place: Place, forecast: ForecastResponse, air: AirResponse?) -> WeatherBundle {
         let tz = TimeZone(identifier: forecast.timezone ?? "UTC") ?? .current
 
         let localParser = DateFormatter()
@@ -124,13 +129,17 @@ struct WeatherService {
         let aqiDaily = dailyMaxAQI(from: air, timezone: tz)
         let rainWindows = rainWindows(from: forecast.hourly, parse: parse, timezone: tz)
         for i in d.time.indices {
+            // Skip any day whose essential high/low is missing rather than crash
+            // on a shorter-than-`time` sibling array or a null value.
+            guard let high = d.temperature_2m_max[safe: i].flatMap({ $0 }),
+                  let low = d.temperature_2m_min[safe: i].flatMap({ $0 }) else { continue }
             let dayDate = localParser.date(from: d.time[i] + "T00:00") ?? Date()
-            let dCode = WeatherCode(raw: d.weather_code[i], isDay: true)
+            let dCode = WeatherCode(raw: d.weather_code[safe: i].flatMap { $0 } ?? 0, isDay: true)
             let window = rainWindows[Self.dayKey(dayDate, tz: tz)]
             days.append(DayPoint(
                 date: dayDate,
-                high: d.temperature_2m_max[i],
-                low: d.temperature_2m_min[i],
+                high: high,
+                low: low,
                 precipitationProbability: d.precipitation_probability_max?[safe: i].flatMap { $0 } ?? 0,
                 uvIndex: d.uv_index_max?[safe: i].flatMap { $0 } ?? 0,
                 code: dCode,
@@ -146,11 +155,12 @@ struct WeatherService {
         let startHour = Calendar.startOfHour(now, tz: tz)
         var hours: [HourPoint] = []
         for i in h.time.indices {
-            guard let hd = parse(h.time[i]), hd >= startHour else { continue }
-            let hCode = WeatherCode(raw: h.weather_code[i], isDay: (h.is_day?[safe: i].flatMap { $0 } ?? 1) == 1)
+            guard let hd = parse(h.time[i]), hd >= startHour,
+                  let temp = h.temperature_2m[safe: i].flatMap({ $0 }) else { continue }
+            let hCode = WeatherCode(raw: h.weather_code[safe: i].flatMap { $0 } ?? 0, isDay: (h.is_day?[safe: i].flatMap { $0 } ?? 1) == 1)
             hours.append(HourPoint(
                 date: hd,
-                temperature: h.temperature_2m[i],
+                temperature: temp,
                 precipitationProbability: h.precipitation_probability?[safe: i].flatMap { $0 } ?? 0,
                 code: hCode
             ))
@@ -180,11 +190,11 @@ struct WeatherService {
             current: current,
             hourly: hours,
             daily: days,
-            aqiNow: air.current?.us_aqi.map { Int($0.rounded()) },
-            pm25: air.current?.pm2_5,
-            pm10: air.current?.pm10,
-            ozone: air.current?.ozone,
-            no2: air.current?.nitrogen_dioxide
+            aqiNow: air?.current?.us_aqi.map { Int($0.rounded()) },
+            pm25: air?.current?.pm2_5,
+            pm10: air?.current?.pm10,
+            ozone: air?.current?.ozone,
+            no2: air?.current?.nitrogen_dioxide
         )
     }
 
@@ -209,8 +219,8 @@ struct WeatherService {
     }
 
     /// Aggregate hourly US AQI into a per-day maximum keyed by yyyy-MM-dd.
-    private func dailyMaxAQI(from air: AirResponse, timezone tz: TimeZone) -> [String: Int] {
-        guard let hourly = air.hourly, let aqi = hourly.us_aqi else { return [:] }
+    private func dailyMaxAQI(from air: AirResponse?, timezone tz: TimeZone) -> [String: Int] {
+        guard let hourly = air?.hourly, let aqi = hourly.us_aqi else { return [:] }
         let parser = DateFormatter()
         parser.locale = Locale(identifier: "en_US_POSIX")
         parser.timeZone = tz

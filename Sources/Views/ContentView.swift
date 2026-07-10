@@ -12,11 +12,13 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             AnimatedBackground(mood: mood)
+                .accessibilityHidden(true)
 
             // Full-screen weather that matches the location: rain, snow, storms, stars.
             if let bundle = viewModel.bundle {
                 WeatherEffects(code: bundle.current.code, sky: bundle.current.code.sky)
                     .ignoresSafeArea()
+                    .accessibilityHidden(true)
             }
 
             switch viewModel.phase {
@@ -25,6 +27,8 @@ struct ContentView: View {
             case .failed(let message):
                 ErrorView(message: message) {
                     Task { await reload() }
+                } onSearch: {
+                    showSearch = true
                 }
             case .loaded(let bundle):
                 loadedContent(bundle)
@@ -103,6 +107,7 @@ struct ContentView: View {
                         .frame(width: 40, height: 40)
                         .glassSurface(cornerRadius: 20)
                 }
+                .accessibilityLabel("Search locations")
 
                 Spacer()
 
@@ -117,6 +122,9 @@ struct ContentView: View {
                         .frame(width: 40, height: 40)
                         .glassSurface(cornerRadius: 20)
                 }
+                .accessibilityLabel("Temperature unit")
+                .accessibilityValue(viewModel.unit == .celsius ? "Celsius" : "Fahrenheit")
+                .accessibilityHint("Double tap to switch units")
             }
             .padding(.horizontal, Theme.pad)
             Spacer()
@@ -146,6 +154,7 @@ private struct LoadingView: View {
 private struct ErrorView: View {
     let message: String
     let retry: () -> Void
+    let onSearch: () -> Void
 
     var body: some View {
         VStack(spacing: 18) {
@@ -163,6 +172,13 @@ private struct ErrorView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24).padding(.vertical, 12)
                     .glassSurface(cornerRadius: 24)
+            }
+            // Always offer a way forward — e.g. when location is denied, retrying
+            // just fails again, so let the user pick a city instead.
+            Button(action: onSearch) {
+                Text("Search for a city")
+                    .font(Theme.body(15))
+                    .foregroundStyle(Color.welkinSecondary)
             }
         }
     }

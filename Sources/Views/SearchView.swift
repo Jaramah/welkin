@@ -33,6 +33,14 @@ struct SearchView: View {
                             .listRowBackground(Color.clear)
                     }
 
+                    if !isSearching && results.isEmpty
+                        && query.trimmingCharacters(in: .whitespaces).count >= 2 {
+                        Text("No matching cities. Check the spelling or your connection.")
+                            .font(Theme.body(14))
+                            .foregroundStyle(Color.welkinSecondary)
+                            .listRowBackground(Color.clear)
+                    }
+
                     ForEach(results) { place in
                         Button {
                             onSelect(place)
