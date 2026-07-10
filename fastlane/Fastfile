@@ -1,0 +1,55 @@
+default_platform(:ios)
+
+APP_IDENTIFIER = "com.github.jaramah.Welkin".freeze
+
+platform :ios do
+  desc "Build Welkin and upload it to TestFlight"
+  lane :beta do
+    # On CI, create a fresh throwaway keychain to hold signing assets.
+    setup_ci
+
+    # Materialize the App Store Connect API key (.p8) from the base64 secret.
+    require "base64"
+    key_path = File.absolute_path("AuthKey.p8")
+    File.write(key_path, Base64.decode64(ENV.fetch("ASC_KEY_CONTENT")))
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: key_path
+    )
+
+    # Welkin.xcodeproj is generated from project.yml — regenerate it before building.
+    Dir.chdir("..") { sh("xcodegen", "generate") }
+
+    # Next build number = whatever is already on TestFlight + 1, so uploads never
+    # collide. Applied to both the app and the widget via a build-setting override.
+    next_build = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      initial_build_number: 0
+    ).to_i + 1
+
+    build_app(
+      project: "Welkin.xcodeproj",
+      scheme: "Welkin",
+      export_method: "app-store",
+      # Let Xcode fetch/create the provisioning profiles on the fly, authenticated
+      # with the same API key, and stamp the computed build number.
+      xcargs: [
+        "-allowProvisioningUpdates",
+        "-authenticationKeyPath", key_path,
+        "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),
+        "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID"),
+        "CURRENT_PROJECT_VERSION=#{next_build}"
+      ].join(" "),
+      export_options: { signingStyle: "automatic" }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

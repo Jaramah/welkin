@@ -1,0 +1,3 @@
+app_identifier("com.github.jaramah.Welkin")
+# Apple Developer Team ID (matches DEVELOPMENT_TEAM in project.yml).
+team_id("V5LHDBRQYB")
