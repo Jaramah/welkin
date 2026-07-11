@@ -35,6 +35,10 @@ targets:
         NSLocationWhenInUseUsageDescription: "Welkin uses your location to show local weather and air quality."
         UIStatusBarStyle: UIStatusBarStyleLightContent
         UIViewControllerBasedStatusBarAppearance: false
+        # Must reference the build settings, or the CI's build-number override
+        # has nothing to substitute into and every upload reuses the same version.
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
         # Welkin uses only standard HTTPS (exempt encryption). Declaring this
         # auto-clears the App Store Connect "Missing Compliance" gate so every
         # build is installable in TestFlight with no manual step.
@@ -73,6 +77,8 @@ targets:
       path: Widget/Info.plist
       properties:
         CFBundleDisplayName: Welkin
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

@@ -35,6 +35,26 @@ platform :ios do
       keychain_password: ENV.fetch("MATCH_KEYCHAIN_PASSWORD", "")
     )
 
+    # Next build number = whatever is already on TestFlight + 1, so uploads never
+    # collide. This has to be resolved BEFORE xcodegen runs so the number can be
+    # baked straight into the generated project.
+    next_build = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      initial_build_number: 0
+    ).to_i + 1
+
+    # Stamp it into project.yml. Passing CURRENT_PROJECT_VERSION as an xcargs
+    # override alone was not enough: Info.plist processing resolved the version
+    # from the project, so every archive carried the stale number and App Store
+    # Connect rejected the upload as a duplicate. Writing it into the source of
+    # truth that xcodegen reads makes the app and the widget agree by construction.
+    project_yml = File.expand_path("../project.yml", __dir__)
+    yaml = File.read(project_yml)
+    yaml.sub!(/CURRENT_PROJECT_VERSION: ".*"/, %(CURRENT_PROJECT_VERSION: "#{next_build}"))
+    File.write(project_yml, yaml)
+    UI.message("Building as version #{next_build}")
+
     # Welkin.xcodeproj is generated from project.yml — regenerate it before building.
     Dir.chdir("..") { sh("xcodegen", "generate") }
 
@@ -76,14 +96,6 @@ platform :ios do
       bundle_identifier: widget_identifier,
       profile_name: widget_profile
     )
-
-    # Next build number = whatever is already on TestFlight + 1, so uploads never
-    # collide. Applied to both the app and the widget via a build-setting override.
-    next_build = latest_testflight_build_number(
-      api_key: api_key,
-      app_identifier: APP_IDENTIFIER,
-      initial_build_number: 0
-    ).to_i + 1
 
     build_app(
       project: "Welkin.xcodeproj",
