@@ -25,6 +25,19 @@ struct LandmarkShape: Shape {
             p.addEllipse(in: CGRect(x: rect.minX + (cx - r) * W, y: rect.minY + (cy - r) * H,
                                     width: 2 * r * W, height: 2 * r * H))
         }
+        // The landmark frame is much wider than it is tall, so `circle` above comes
+        // out as a flat oval. Wheels and spheres need to stay actually round, so
+        // compress the x-radius by the frame's aspect ratio.
+        let aspect = H / max(W, 0.0001)
+        func roundCircle(_ cx: CGFloat, _ cy: CGFloat, _ r: CGFloat) {
+            let rx = r * aspect
+            p.addEllipse(in: CGRect(x: rect.minX + (cx - rx) * W, y: rect.minY + (cy - r) * H,
+                                    width: 2 * rx * W, height: 2 * r * H))
+        }
+        /// A point on a circle of radius `r` about (cx, cy), kept round via `aspect`.
+        func onCircle(_ cx: CGFloat, _ cy: CGFloat, _ r: CGFloat, _ angle: Double) -> (CGFloat, CGFloat) {
+            (cx + r * CGFloat(cos(angle)) * aspect, cy + r * CGFloat(sin(angle)))
+        }
 
         switch kind {
         case .pyramids:
@@ -256,14 +269,13 @@ struct LandmarkShape: Shape {
             rectShape(0.26, 0.44, 0.74, 0.38)
 
         case .londonEye:
-            p.addEllipse(in: CGRect(x: rect.minX + 0.20 * W, y: rect.minY + 0.06 * H, width: 0.60 * W, height: 0.60 * H))
-            p.addEllipse(in: CGRect(x: rect.minX + 0.235 * W, y: rect.minY + 0.095 * H, width: 0.53 * W, height: 0.53 * H)) // rim hole
+            roundCircle(0.50, 0.36, 0.30)              // outer rim (kept round, not oval)
+            roundCircle(0.50, 0.36, 0.265)             // rim hole
             for i in 0..<16 {
                 let a = Double(i) / 16 * 2 * .pi
-                let tip = (0.50 + CGFloat(cos(a)) * 0.29, 0.36 + CGFloat(sin(a)) * 0.29)
-                bar(&p, pt: pt, a: (0.50, 0.36), b: tip, th: 0.004)
+                bar(&p, pt: pt, a: (0.50, 0.36), b: onCircle(0.50, 0.36, 0.29, a), th: 0.004)
             }
-            circle(0.50, 0.36, 0.03)
+            roundCircle(0.50, 0.36, 0.03)
             poly([(0.44, 1.0), (0.48, 1.0), (0.505, 0.36), (0.495, 0.36)])
             poly([(0.56, 1.0), (0.52, 1.0), (0.495, 0.36), (0.505, 0.36)])
 
@@ -344,9 +356,9 @@ struct LandmarkShape: Shape {
             rectShape(0.47, 0.51, 0.53, 0.385)         // column between the spheres
             rectShape(0.478, 0.215, 0.522, 0.175)      // column below the top sphere
             rectShape(0.492, 0.085, 0.508, 0.02)       // antenna
-            circle(0.50, 0.62, 0.11)                   // lower sphere
-            circle(0.50, 0.30, 0.085)                  // upper sphere
-            circle(0.50, 0.13, 0.045)                  // top sphere
+            roundCircle(0.50, 0.62, 0.11)              // lower sphere
+            roundCircle(0.50, 0.30, 0.085)             // upper sphere
+            roundCircle(0.50, 0.13, 0.045)             // top sphere
             poly([(0.30, 1.00), (0.455, 0.76), (0.505, 0.76), (0.385, 1.00)])   // splayed legs
             poly([(0.70, 1.00), (0.545, 0.76), (0.495, 0.76), (0.615, 1.00)])
 
@@ -437,13 +449,26 @@ struct LandmarkShape: Shape {
             rectShape(0.05, 0.60, 0.29, 0.555)         // the water jet from its mouth
 
         case .singaporeFlyer:
-            circle(0.50, 0.36, 0.32)                   // outer rim
-            circle(0.50, 0.36, 0.26)                   // inner rim → a ring via eoFill
-            rectShape(0.493, 0.60, 0.507, 0.12)        // vertical spokes (inside the hub)
-            rectShape(0.26, 0.368, 0.74, 0.352)        // horizontal spokes
-            poly([(0.30, 1.00), (0.455, 0.70), (0.505, 0.70), (0.39, 1.00)])  // left A-frame leg
-            poly([(0.70, 1.00), (0.545, 0.70), (0.495, 0.70), (0.61, 1.00)])  // right A-frame leg
-            rectShape(0.26, 1.00, 0.74, 0.955)         // base platform
+            let fx: CGFloat = 0.50, fy: CGFloat = 0.40, fr: CGFloat = 0.32
+            roundCircle(fx, fy, fr)                    // outer rim
+            roundCircle(fx, fy, fr - 0.030)            // inner rim → a ring via eoFill
+            // 16 spokes, hub out to the inner rim
+            for i in 0..<16 {
+                let a = Double(i) / 16 * 2 * .pi
+                bar(&p, pt: pt,
+                    a: onCircle(fx, fy, 0.055, a),
+                    b: onCircle(fx, fy, fr - 0.030, a), th: 0.005)
+            }
+            roundCircle(fx, fy, 0.055)                 // hub
+            // 16 capsules riding just outside the rim
+            for i in 0..<16 {
+                let a = (Double(i) + 0.5) / 16 * 2 * .pi
+                let c = onCircle(fx, fy, fr + 0.022, a)
+                roundCircle(c.0, c.1, 0.021)
+            }
+            rectShape(0.18, 1.00, 0.82, 0.955)         // terminal building
+            bar(&p, pt: pt, a: (0.31, 0.955), b: (0.47, 0.72), th: 0.013)   // A-frame legs
+            bar(&p, pt: pt, a: (0.69, 0.955), b: (0.53, 0.72), th: 0.013)
 
         case .gatewayArch:
             bandArch(&p, pt: pt, from: (0.28, 1.0), to: (0.72, 1.0), peakY: 0.05, thickness: 0.03)
