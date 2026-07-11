@@ -1,6 +1,7 @@
 default_platform(:ios)
 
 APP_IDENTIFIER = "com.github.jaramah.Welkin".freeze
+TEAM_ID = "V5LHDBRQYB".freeze
 
 platform :ios do
   desc "Build Welkin and upload it to TestFlight"
@@ -51,6 +52,31 @@ platform :ios do
       provisioning_name: "Welkin Widget CI App Store", force: true
     )
 
+    # Pin BOTH targets to manual signing with the profiles above, and drop
+    # -allowProvisioningUpdates. Left on automatic, the archive asked Xcode to mint
+    # a fresh *development* certificate on every run; ephemeral runners can't reuse
+    # them, so they piled up until the account hit Apple's certificate cap
+    # ("Choose a certificate to revoke"). Manual signing creates nothing — it just
+    # uses the distribution cert we imported and the profiles we downloaded.
+    update_code_signing_settings(
+      path: "Welkin.xcodeproj",
+      use_automatic_signing: false,
+      team_id: TEAM_ID,
+      code_sign_identity: "Apple Distribution",
+      targets: ["Welkin"],
+      bundle_identifier: APP_IDENTIFIER,
+      profile_name: app_profile
+    )
+    update_code_signing_settings(
+      path: "Welkin.xcodeproj",
+      use_automatic_signing: false,
+      team_id: TEAM_ID,
+      code_sign_identity: "Apple Distribution",
+      targets: ["WelkinWidgetExtension"],
+      bundle_identifier: widget_identifier,
+      profile_name: widget_profile
+    )
+
     # Next build number = whatever is already on TestFlight + 1, so uploads never
     # collide. Applied to both the app and the widget via a build-setting override.
     next_build = latest_testflight_build_number(
@@ -63,18 +89,10 @@ platform :ios do
       project: "Welkin.xcodeproj",
       scheme: "Welkin",
       export_method: "app-store",
-      xcargs: [
-        "-allowProvisioningUpdates",
-        "-authenticationKeyPath", key_path,
-        "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),
-        "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID"),
-        "CURRENT_PROJECT_VERSION=#{next_build}"
-      ].join(" "),
-      # Manual signing at export with the profiles we just created — this is what
-      # avoids the "Cloud signing permission error".
+      xcargs: "CURRENT_PROJECT_VERSION=#{next_build}",
       export_options: {
         signingStyle: "manual",
-        teamID: "V5LHDBRQYB",
+        teamID: TEAM_ID,
         provisioningProfiles: {
           APP_IDENTIFIER => app_profile,
           widget_identifier => widget_profile
