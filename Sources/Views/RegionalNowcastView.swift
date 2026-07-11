@@ -3,6 +3,8 @@ import SwiftUI
 /// Two-column, area-by-area nowcast for Singapore (NEA 2-hour forecast).
 struct RegionalNowcastView: View {
     let nowcast: RegionalNowcast
+    /// Tapping an area opens its full forecast.
+    var onSelect: (Place) -> Void
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -20,30 +22,54 @@ struct RegionalNowcastView: View {
 
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                     ForEach(nowcast.areas) { area in
-                        HStack(spacing: 10) {
-                            Image(systemName: area.symbol)
-                                .symbolRenderingMode(.multicolor)
-                                .font(.system(size: 20))
-                                .frame(width: 26, height: 24)
-
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(area.name)
-                                    .font(Theme.body(14))
-                                    .foregroundStyle(Color.welkinPrimary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
-                                Text(area.forecast)
-                                    .font(Theme.label(11))
-                                    .foregroundStyle(Color.welkinTertiary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
+                        if let place = area.place {
+                            Button { onSelect(place) } label: {
+                                AreaRow(area: area, tappable: true)
                             }
-                            Spacer(minLength: 0)
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Opens the forecast for \(area.name)")
+                        } else {
+                            AreaRow(area: area, tappable: false)
                         }
-                        .accessibilityElement(children: .combine)
                     }
                 }
             }
         }
+    }
+}
+
+private struct AreaRow: View {
+    let area: RegionalNowcast.AreaForecast
+    let tappable: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: area.symbol)
+                .symbolRenderingMode(.multicolor)
+                .font(.system(size: 20))
+                .frame(width: 26, height: 24)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(area.name)
+                    .font(Theme.body(14))
+                    .foregroundStyle(Color.welkinPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                Text(area.forecast)
+                    .font(Theme.label(11))
+                    .foregroundStyle(Color.welkinTertiary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 0)
+
+            if tappable {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(Color.welkinTertiary)
+            }
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 }

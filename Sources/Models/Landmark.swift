@@ -13,6 +13,9 @@ enum LandmarkKind: Sendable, CaseIterable {
     case capitolBuilding, sugarloaf, superTrees, gatewayArch, petronasTowers, chichenItza
     case atomium, templeOfHeaven, hagiaSophia, windmill, indiaGate
     case merlion, singaporeFlyer
+    // Wider world
+    case taipei101, orientalPearl, gatewayOfIndia, watArun, namsanTower, bankOfChina
+    case torii, monas, skyTower, belemTower, angkorWat
     case skyline           // generic fallback
 
     /// Subtitle shown under the city name.
@@ -66,6 +69,17 @@ enum LandmarkKind: Sendable, CaseIterable {
         case .indiaGate:         return "India Gate"
         case .merlion:           return "The Merlion"
         case .singaporeFlyer:    return "Singapore Flyer"
+        case .taipei101:         return "Taipei 101"
+        case .orientalPearl:     return "Oriental Pearl Tower"
+        case .gatewayOfIndia:    return "Gateway of India"
+        case .watArun:           return "Wat Arun"
+        case .namsanTower:       return "N Seoul Tower"
+        case .bankOfChina:       return "Bank of China Tower"
+        case .torii:             return "Fushimi Inari Torii"
+        case .monas:             return "National Monument"
+        case .skyTower:          return "Sky Tower"
+        case .belemTower:        return "Belém Tower"
+        case .angkorWat:         return "Angkor Wat"
         case .skyline:           return "Skyline"
         }
     }
@@ -138,19 +152,49 @@ enum LandmarkCatalog {
         .init(city: "Denver", kinds: [.skyline], keywords: ["denver"], lat: 39.7392, lon: -104.9903),
         .init(city: "Las Vegas", kinds: [.skyline], keywords: ["las vegas"], lat: 36.1699, lon: -115.1398),
         .init(city: "Vancouver", kinds: [.skyline], keywords: ["vancouver"], lat: 49.2827, lon: -123.1207),
-        .init(city: "Hong Kong", kinds: [.skyline], keywords: ["hong kong", "kowloon"], lat: 22.3193, lon: 114.1694),
-        .init(city: "Shanghai", kinds: [.skyline], keywords: ["shanghai"], lat: 31.2304, lon: 121.4737),
-        .init(city: "Mumbai", kinds: [.skyline], keywords: ["mumbai", "bombay"], lat: 19.0760, lon: 72.8777),
-        .init(city: "Bangkok", kinds: [.skyline], keywords: ["bangkok"], lat: 13.7563, lon: 100.5018),
+        .init(city: "Hong Kong", kinds: [.bankOfChina, .skyline], keywords: ["hong kong", "kowloon"], lat: 22.3193, lon: 114.1694),
+        .init(city: "Shanghai", kinds: [.orientalPearl, .skyline], keywords: ["shanghai"], lat: 31.2304, lon: 121.4737),
+        .init(city: "Mumbai", kinds: [.gatewayOfIndia, .skyline], keywords: ["mumbai", "bombay"], lat: 19.0760, lon: 72.8777),
+        .init(city: "Bangkok", kinds: [.watArun, .skyline], keywords: ["bangkok"], lat: 13.7563, lon: 100.5018),
         .init(city: "Madrid", kinds: [.skyline], keywords: ["madrid"], lat: 40.4168, lon: -3.7038),
         .init(city: "Amman", kinds: [.skyline], keywords: ["amman"], lat: 31.9539, lon: 35.9106),
         .init(city: "Buenos Aires", kinds: [.skyline], keywords: ["buenos aires"], lat: -34.6037, lon: -58.3816),
         .init(city: "São Paulo", kinds: [.skyline], keywords: ["são paulo", "sao paulo"], lat: -23.5505, lon: -46.6333),
         .init(city: "Melbourne", kinds: [.skyline], keywords: ["melbourne"], lat: -37.8136, lon: 144.9631),
-        .init(city: "Seoul", kinds: [.skyline], keywords: ["seoul"], lat: 37.5665, lon: 126.9780),
+        .init(city: "Seoul", kinds: [.namsanTower, .skyline], keywords: ["seoul"], lat: 37.5665, lon: 126.9780),
         .init(city: "Austin", kinds: [.skyline], keywords: ["austin"], lat: 30.2672, lon: -97.7431),
         .init(city: "Philadelphia", kinds: [.skyline], keywords: ["philadelphia"], lat: 39.9526, lon: -75.1652),
         .init(city: "Atlanta", kinds: [.skyline], keywords: ["atlanta"], lat: 33.7490, lon: -84.3880),
+        // Newly covered countries & cities
+        .init(city: "Taipei", kinds: [.taipei101, .skyline], keywords: ["taipei"], lat: 25.0330, lon: 121.5654),
+        .init(city: "Kyoto", kinds: [.torii], keywords: ["kyoto"], lat: 35.0116, lon: 135.7681),
+        .init(city: "Osaka", kinds: [.torii, .skyline], keywords: ["osaka"], lat: 34.6937, lon: 135.5023),
+        .init(city: "Jakarta", kinds: [.monas, .skyline], keywords: ["jakarta"], lat: -6.2088, lon: 106.8456),
+        .init(city: "Manila", kinds: [.skyline], keywords: ["manila", "quezon"], lat: 14.5995, lon: 120.9842),
+        .init(city: "Hanoi", kinds: [.skyline], keywords: ["hanoi", "ha noi"], lat: 21.0278, lon: 105.8342),
+        .init(city: "Ho Chi Minh City", kinds: [.skyline], keywords: ["ho chi minh", "saigon"], lat: 10.8231, lon: 106.6297),
+        .init(city: "Siem Reap", kinds: [.angkorWat], keywords: ["siem reap", "phnom penh"], lat: 13.3671, lon: 103.8448),
+        .init(city: "Auckland", kinds: [.skyTower], keywords: ["auckland"], lat: -36.8485, lon: 174.7633),
+        .init(city: "Lisbon", kinds: [.belemTower], keywords: ["lisbon", "lisboa"], lat: 38.7223, lon: -9.1393),
+        .init(city: "Dublin", kinds: [.skyline], keywords: ["dublin"], lat: 53.3498, lon: -6.2603),
+        .init(city: "Prague", kinds: [.skyline], keywords: ["prague", "praha"], lat: 50.0755, lon: 14.4378),
+        .init(city: "Vienna", kinds: [.skyline], keywords: ["vienna", "wien"], lat: 48.2082, lon: 16.3738),
+        .init(city: "Copenhagen", kinds: [.skyline], keywords: ["copenhagen", "kobenhavn"], lat: 55.6761, lon: 12.5683),
+        .init(city: "Stockholm", kinds: [.skyline], keywords: ["stockholm"], lat: 59.3293, lon: 18.0686),
+        .init(city: "Zurich", kinds: [.skyline], keywords: ["zurich", "zürich"], lat: 47.3769, lon: 8.5417),
+        .init(city: "Milan", kinds: [.skyline], keywords: ["milan", "milano"], lat: 45.4642, lon: 9.1900),
+        .init(city: "Munich", kinds: [.skyline], keywords: ["munich", "münchen"], lat: 48.1351, lon: 11.5820),
+        .init(city: "Doha", kinds: [.skyline], keywords: ["doha"], lat: 25.2854, lon: 51.5310),
+        .init(city: "Tel Aviv", kinds: [.skyline], keywords: ["tel aviv"], lat: 32.0853, lon: 34.7818),
+        .init(city: "Nairobi", kinds: [.skyline], keywords: ["nairobi"], lat: -1.2921, lon: 36.8219),
+        .init(city: "Lagos", kinds: [.skyline], keywords: ["lagos"], lat: 6.5244, lon: 3.3792),
+        .init(city: "Marrakech", kinds: [.skyline], keywords: ["marrakech", "marrakesh", "casablanca"], lat: 31.6295, lon: -7.9811),
+        .init(city: "Montreal", kinds: [.skyline], keywords: ["montreal", "montréal"], lat: 45.5017, lon: -73.5673),
+        .init(city: "New Orleans", kinds: [.skyline], keywords: ["new orleans"], lat: 29.9511, lon: -90.0715),
+        .init(city: "Honolulu", kinds: [.palmTrees], keywords: ["honolulu"], lat: 21.3069, lon: -157.8583),
+        .init(city: "Lima", kinds: [.skyline], keywords: ["lima"], lat: -12.0464, lon: -77.0428),
+        .init(city: "Santiago", kinds: [.skyline], keywords: ["santiago"], lat: -33.4489, lon: -70.6693),
+        .init(city: "Havana", kinds: [.skyline], keywords: ["havana", "habana"], lat: 23.1136, lon: -82.3666),
     ]
 
     static func landmark(for place: Place, on date: Date = Date()) -> Landmark {

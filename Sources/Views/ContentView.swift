@@ -75,7 +75,9 @@ struct ContentView: View {
                 }
 
                 if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
-                    RegionalNowcastView(nowcast: nowcast)
+                    RegionalNowcastView(nowcast: nowcast) { place in
+                        Task { await viewModel.load(place: place) }
+                    }
                 }
 
                 if let aqi = bundle.aqiNow {

@@ -329,6 +329,99 @@ struct LandmarkShape: Shape {
             superTree(&p, pt: pt, cx: 0.52, topY: 0.22)
             superTree(&p, pt: pt, cx: 0.73, topY: 0.42)
 
+        case .taipei101:
+            rectShape(0.28, 1.00, 0.72, 0.88)          // podium
+            rectShape(0.41, 0.88, 0.59, 0.18)          // core shaft
+            // Tier wings, abutting the shaft on each side (never overlapping it).
+            for y in [CGFloat(0.80), 0.68, 0.56, 0.44, 0.32] {
+                rectShape(0.355, y, 0.41, y - 0.045)
+                rectShape(0.59, y, 0.645, y - 0.045)
+            }
+            rectShape(0.487, 0.18, 0.513, 0.03)        // spire
+
+        case .orientalPearl:
+            rectShape(0.47, 1.00, 0.53, 0.73)          // column below the lower sphere
+            rectShape(0.47, 0.51, 0.53, 0.385)         // column between the spheres
+            rectShape(0.478, 0.215, 0.522, 0.175)      // column below the top sphere
+            rectShape(0.492, 0.085, 0.508, 0.02)       // antenna
+            circle(0.50, 0.62, 0.11)                   // lower sphere
+            circle(0.50, 0.30, 0.085)                  // upper sphere
+            circle(0.50, 0.13, 0.045)                  // top sphere
+            poly([(0.30, 1.00), (0.455, 0.76), (0.505, 0.76), (0.385, 1.00)])   // splayed legs
+            poly([(0.70, 1.00), (0.545, 0.76), (0.495, 0.76), (0.615, 1.00)])
+
+        case .gatewayOfIndia:
+            rectShape(0.18, 1.00, 0.82, 0.30)          // main block
+            poly([(0.41, 1.00), (0.41, 0.62), (0.45, 0.53), (0.50, 0.50),
+                  (0.55, 0.53), (0.59, 0.62), (0.59, 1.00)])          // central arch (hole)
+            poly([(0.39, 0.30), (0.41, 0.23), (0.45, 0.19), (0.50, 0.18),
+                  (0.55, 0.19), (0.59, 0.23), (0.61, 0.30)])          // central dome
+            rectShape(0.20, 0.30, 0.28, 0.20)          // turrets, sitting on the block
+            rectShape(0.72, 0.30, 0.80, 0.20)
+            poly([(0.20, 0.20), (0.24, 0.14), (0.28, 0.20)])          // turret caps
+            poly([(0.72, 0.20), (0.76, 0.14), (0.80, 0.20)])
+
+        case .watArun:
+            rectShape(0.08, 1.00, 0.92, 0.88)          // terrace
+            poly([(0.36, 0.88), (0.44, 0.30), (0.50, 0.06), (0.56, 0.30), (0.64, 0.88)])  // central prang
+            poly([(0.12, 0.88), (0.17, 0.55), (0.22, 0.88)])          // satellite prangs
+            poly([(0.24, 0.88), (0.29, 0.62), (0.34, 0.88)])
+            poly([(0.66, 0.88), (0.71, 0.62), (0.76, 0.88)])
+            poly([(0.78, 0.88), (0.83, 0.55), (0.88, 0.88)])
+
+        case .namsanTower:
+            poly([(0.00, 1.00), (0.22, 0.78), (0.50, 0.70), (0.78, 0.78), (1.00, 1.00)])  // Namsan hill
+            rectShape(0.465, 0.72, 0.535, 0.34)        // shaft, embedded in the hill
+            poly([(0.42, 0.34), (0.58, 0.34), (0.555, 0.24), (0.445, 0.24)])  // observation deck
+            rectShape(0.487, 0.24, 0.513, 0.06)        // antenna
+
+        case .bankOfChina:
+            poly([(0.32, 1.00), (0.32, 0.42), (0.50, 0.10), (0.50, 1.00)])    // left prism
+            poly([(0.50, 1.00), (0.50, 0.10), (0.68, 0.42), (0.68, 1.00)])    // right prism
+            rectShape(0.495, 0.10, 0.505, 0.02)        // mast
+            rectShape(0.06, 1.00, 0.20, 0.72)          // harbour-front skyline
+            rectShape(0.72, 1.00, 0.86, 0.66)
+            rectShape(0.86, 1.00, 0.94, 0.80)
+
+        case .torii:
+            rectShape(0.24, 1.00, 0.31, 0.22)          // pillars
+            rectShape(0.69, 1.00, 0.76, 0.22)
+            rectShape(0.18, 0.34, 0.82, 0.27)          // nuki (lower beam) crossing the pillars
+            poly([(0.10, 0.22), (0.90, 0.22), (0.86, 0.12), (0.14, 0.12)])    // kasagi (top beam)
+
+        case .monas:
+            rectShape(0.30, 1.00, 0.70, 0.90)          // base
+            poly([(0.40, 0.90), (0.60, 0.90), (0.545, 0.22), (0.455, 0.22)])  // tapering column
+            poly([(0.455, 0.22), (0.545, 0.22), (0.52, 0.10), (0.50, 0.04), (0.48, 0.10)])  // flame
+
+        case .skyTower:
+            poly([(0.40, 1.00), (0.47, 0.46), (0.53, 0.46), (0.60, 1.00)])    // splayed shaft
+            poly([(0.38, 0.46), (0.62, 0.46), (0.575, 0.32), (0.425, 0.32)])  // main pod
+            rectShape(0.47, 0.32, 0.53, 0.24)          // upper shaft
+            poly([(0.44, 0.24), (0.56, 0.24), (0.53, 0.17), (0.47, 0.17)])    // upper pod
+            rectShape(0.492, 0.17, 0.508, 0.02)        // mast
+            rectShape(0.14, 1.00, 0.30, 0.80)          // low buildings
+            rectShape(0.70, 1.00, 0.84, 0.76)
+
+        case .belemTower:
+            rectShape(0.30, 1.00, 0.70, 0.62)          // bastion
+            rectShape(0.40, 0.62, 0.66, 0.20)          // tower
+            rectShape(0.405, 0.20, 0.45, 0.14)         // tower battlements
+            rectShape(0.465, 0.20, 0.51, 0.14)
+            rectShape(0.525, 0.20, 0.57, 0.14)
+            rectShape(0.585, 0.20, 0.63, 0.14)
+            rectShape(0.305, 0.62, 0.345, 0.56)        // bastion battlements
+            rectShape(0.355, 0.62, 0.395, 0.56)
+            rectShape(0.665, 0.62, 0.695, 0.56)
+
+        case .angkorWat:
+            rectShape(0.04, 1.00, 0.96, 0.84)          // long terrace
+            poly([(0.42, 0.84), (0.50, 0.16), (0.58, 0.84)])          // central tower
+            poly([(0.20, 0.84), (0.26, 0.44), (0.32, 0.84)])
+            poly([(0.68, 0.84), (0.74, 0.44), (0.80, 0.84)])
+            poly([(0.06, 0.84), (0.11, 0.56), (0.16, 0.84)])
+            poly([(0.84, 0.84), (0.89, 0.56), (0.94, 0.84)])
+
         case .merlion:
             rectShape(0.20, 1.00, 0.80, 0.90)          // plinth
             // Lion head, mane, body and curling tail as one closed silhouette.

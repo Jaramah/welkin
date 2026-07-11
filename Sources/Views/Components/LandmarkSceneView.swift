@@ -71,9 +71,15 @@ struct LandmarkSceneView: View {
         case .superTrees:      return Color(red: 0.10, green: 0.20, blue: 0.16)   // canopy
         case .sugarloaf, .chichenItza: return Color(red: 0.20, green: 0.17, blue: 0.14) // rock/stone
         case .gatewayArch, .atomium, .petronasTowers, .singaporeFlyer: return Color(red: 0.14, green: 0.16, blue: 0.22) // steel
+        case .taipei101, .orientalPearl, .bankOfChina, .skyTower, .namsanTower:
+                               return Color(red: 0.13, green: 0.17, blue: 0.24)   // glass & steel
         case .templeOfHeaven:  return Color(red: 0.10, green: 0.22, blue: 0.30)   // blue roofs
         case .burjAlArab:      return Color(red: 0.10, green: 0.18, blue: 0.32)   // sail
         case .merlion:         return Color(red: 0.26, green: 0.28, blue: 0.30)   // white stone
+        case .torii:           return Color(red: 0.50, green: 0.13, blue: 0.11)   // vermillion
+        case .watArun, .angkorWat, .gatewayOfIndia, .belemTower:
+                               return Color(red: 0.30, green: 0.26, blue: 0.19)   // temple stone
+        case .monas:           return Color(red: 0.32, green: 0.27, blue: 0.14)   // gilded flame
         default:               return Color(red: 0.05, green: 0.06, blue: 0.12)
         }
     }

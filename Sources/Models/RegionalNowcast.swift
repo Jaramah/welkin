@@ -8,9 +8,19 @@ struct RegionalNowcast: Sendable {
     struct AreaForecast: Identifiable, Sendable {
         let name: String                 // e.g. "Ang Mo Kio"
         let forecast: String             // e.g. "Partly Cloudy (Night)"
+        let latitude: Double?            // from NEA's area_metadata
+        let longitude: Double?
 
         var id: String { name }
         var symbol: String { RegionalNowcast.symbol(for: forecast) }
+
+        /// Tapping an area loads its full forecast — only possible if NEA gave us
+        /// a coordinate for it.
+        var place: Place? {
+            guard let latitude, let longitude else { return nil }
+            return Place(name: name, country: "Singapore",
+                         latitude: latitude, longitude: longitude)
+        }
     }
 
     /// Map NEA's forecast vocabulary to an SF Symbol, day/night aware.

@@ -19,8 +19,21 @@ struct NEAService: Sendable {
         guard let item = decoded.data.items.first else {
             throw URLError(.zeroByteResource)
         }
+        // area_metadata carries each area's coordinate — join it to the forecasts
+        // so a tapped area can be opened as a place.
+        let coords = Dictionary(
+            decoded.data.area_metadata.map { ($0.name, $0.label_location) },
+            uniquingKeysWith: { first, _ in first }
+        )
         let areas = item.forecasts
-            .map { RegionalNowcast.AreaForecast(name: $0.area, forecast: $0.forecast) }
+            .map { f in
+                RegionalNowcast.AreaForecast(
+                    name: f.area,
+                    forecast: f.forecast,
+                    latitude: coords[f.area]?.latitude,
+                    longitude: coords[f.area]?.longitude
+                )
+            }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         return RegionalNowcast(validPeriodText: item.valid_period.text ?? "", areas: areas)
     }
@@ -31,7 +44,16 @@ struct NEAService: Sendable {
         let data: DataBlock
 
         struct DataBlock: Decodable {
+            let area_metadata: [AreaMeta]
             let items: [Item]
+        }
+        struct AreaMeta: Decodable {
+            let name: String
+            let label_location: LabelLocation
+        }
+        struct LabelLocation: Decodable {
+            let latitude: Double
+            let longitude: Double
         }
         struct Item: Decodable {
             let valid_period: ValidPeriod
