@@ -77,10 +77,7 @@ final class WeatherViewModel {
         if bundle == nil { phase = .loading }
         do {
             let coord = try await location.requestCurrentLocation()
-            // Try to name the place via reverse geocoding for a nicer title.
-            let name = await reverseName(coord) ?? "Current Location"
-            let place = Place(name: name, latitude: coord.latitude, longitude: coord.longitude)
-            await load(place: place)
+            await load(place: namedPlace(for: coord))
         } catch {
             phase = .failed(error.localizedDescription)
         }
@@ -90,10 +87,25 @@ final class WeatherViewModel {
         (try? await service.search(query: query)) ?? []
     }
 
-    private func reverseName(_ coord: CLLocationCoordinate2D) async -> String? {
+    /// Name the current position as precisely as the geocoder allows. `locality`
+    /// alone is useless in a city-state — it just says "Singapore" — so prefer the
+    /// neighbourhood ("Bedok", "Tampines") and keep the city as the subtitle.
+    private func namedPlace(for coord: CLLocationCoordinate2D) async -> Place {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-        let placemarks = try? await geocoder.reverseGeocodeLocation(location)
-        return placemarks?.first?.locality ?? placemarks?.first?.name
+        let mark = (try? await geocoder.reverseGeocodeLocation(location))?.first
+
+        let name = mark?.subLocality
+            ?? mark?.locality
+            ?? mark?.subAdministrativeArea
+            ?? mark?.name
+            ?? "Current Location"
+        let city = mark?.locality
+
+        return Place(name: name,
+                     admin: city == name ? nil : city,
+                     country: mark?.country,
+                     latitude: coord.latitude,
+                     longitude: coord.longitude)
     }
 }

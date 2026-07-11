@@ -19,7 +19,9 @@ final class LocationManager: NSObject {
     override init() {
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        // Kilometre accuracy is too coarse to resolve a neighbourhood (it can't
+        // tell Bedok from Tampines), which is what we name the location by.
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
     func requestCurrentLocation() async throws -> CLLocationCoordinate2D {
