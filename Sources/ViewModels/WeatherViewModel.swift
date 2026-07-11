@@ -46,6 +46,7 @@ final class WeatherViewModel {
             let bundle = try await service.fetch(for: place, unit: unit)
             phase = .loaded(bundle)
             loadRegionalNowcast(for: place)
+            evaluateAlerts(for: bundle)
             // Hand the current location + unit to the widget and refresh it.
             SharedStore.save(place: StoredPlace(name: place.name,
                                                 latitude: place.latitude,
@@ -69,7 +70,23 @@ final class WeatherViewModel {
             guard let self else { return }
             if let nowcast = try? await self.nea.twoHourNowcast() {
                 self.regionalNowcast = nowcast
+                // Re-run alerts now that we have the area-level nowcast, which
+                // gives a far better rain signal than the coarse hourly model.
+                if let bundle = self.bundle { self.evaluateAlerts(for: bundle) }
             }
+        }
+    }
+
+    /// Fire any due weather alerts. Cooldowns inside NotificationService stop
+    /// this from notifying repeatedly on every refresh.
+    private func evaluateAlerts(for bundle: WeatherBundle) {
+        let settings = NotificationSettings.load()
+        guard settings.anyEnabled else { return }
+        let nowcast = regionalNowcast
+        let unit = self.unit
+        Task {
+            await NotificationService.shared.process(bundle: bundle, nowcast: nowcast,
+                                                     unit: unit, settings: settings)
         }
     }
 

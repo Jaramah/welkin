@@ -28,6 +28,15 @@ struct SearchView: View {
                     }
                     .listRowBackground(Color.white.opacity(0.06))
 
+                    NavigationLink {
+                        NotificationSettingsView()
+                    } label: {
+                        Label("Notifications & Alerts", systemImage: "bell.badge")
+                            .font(Theme.body(16))
+                            .foregroundStyle(Color.welkinPrimary)
+                    }
+                    .listRowBackground(Color.white.opacity(0.06))
+
                     if isSearching {
                         HStack { Spacer(); ProgressView().tint(.white); Spacer() }
                             .listRowBackground(Color.clear)

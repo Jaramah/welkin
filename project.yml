@@ -39,6 +39,11 @@ targets:
         # auto-clears the App Store Connect "Missing Compliance" gate so every
         # build is installable in TestFlight with no manual step.
         ITSAppUsesNonExemptEncryption: false
+        # Lets iOS wake the app to re-check the weather and fire alerts.
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.github.jaramah.Welkin.refresh
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.github.jaramah.Welkin
