@@ -59,6 +59,7 @@ targets:
       - path: Sources/Models/AirQuality.swift
       - path: Sources/Models/WeatherModels.swift
       - path: Sources/Models/Landmark.swift
+      - path: Sources/Models/LocalFlavor.swift
       - path: Sources/Services/WeatherService.swift
       - path: Sources/Services/OpenMeteoDTO.swift
       - path: Sources/Views/Components/LandmarkShape.swift

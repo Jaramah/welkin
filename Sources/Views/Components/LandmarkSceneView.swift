@@ -70,9 +70,10 @@ struct LandmarkSceneView: View {
         case .parthenon, .colosseum: return Color(red: 0.28, green: 0.26, blue: 0.22) // marble/travertine
         case .superTrees:      return Color(red: 0.10, green: 0.20, blue: 0.16)   // canopy
         case .sugarloaf, .chichenItza: return Color(red: 0.20, green: 0.17, blue: 0.14) // rock/stone
-        case .gatewayArch, .atomium, .petronasTowers: return Color(red: 0.14, green: 0.16, blue: 0.22) // steel
+        case .gatewayArch, .atomium, .petronasTowers, .singaporeFlyer: return Color(red: 0.14, green: 0.16, blue: 0.22) // steel
         case .templeOfHeaven:  return Color(red: 0.10, green: 0.22, blue: 0.30)   // blue roofs
         case .burjAlArab:      return Color(red: 0.10, green: 0.18, blue: 0.32)   // sail
+        case .merlion:         return Color(red: 0.26, green: 0.28, blue: 0.30)   // white stone
         default:               return Color(red: 0.05, green: 0.06, blue: 0.12)
         }
     }

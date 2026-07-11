@@ -329,6 +329,29 @@ struct LandmarkShape: Shape {
             superTree(&p, pt: pt, cx: 0.52, topY: 0.22)
             superTree(&p, pt: pt, cx: 0.73, topY: 0.42)
 
+        case .merlion:
+            rectShape(0.20, 1.00, 0.80, 0.90)          // plinth
+            // Lion head, mane, body and curling tail as one closed silhouette.
+            poly([
+                (0.32, 0.90), (0.32, 0.62), (0.27, 0.57),   // chest up to the jaw
+                (0.35, 0.50), (0.36, 0.41),                 // snout, then up the mane
+                (0.44, 0.32), (0.54, 0.31), (0.61, 0.39),   // mane over the head
+                (0.59, 0.51), (0.67, 0.59),                 // neck down to the shoulder
+                (0.77, 0.63), (0.87, 0.55), (0.93, 0.41),   // back, tail sweeping up
+                (0.87, 0.38), (0.84, 0.53),                 // tail tip and inner edge
+                (0.74, 0.71), (0.68, 0.90),                 // back down to the plinth
+            ])
+            rectShape(0.05, 0.60, 0.29, 0.555)         // the water jet from its mouth
+
+        case .singaporeFlyer:
+            circle(0.50, 0.36, 0.32)                   // outer rim
+            circle(0.50, 0.36, 0.26)                   // inner rim → a ring via eoFill
+            rectShape(0.493, 0.60, 0.507, 0.12)        // vertical spokes (inside the hub)
+            rectShape(0.26, 0.368, 0.74, 0.352)        // horizontal spokes
+            poly([(0.30, 1.00), (0.455, 0.70), (0.505, 0.70), (0.39, 1.00)])  // left A-frame leg
+            poly([(0.70, 1.00), (0.545, 0.70), (0.495, 0.70), (0.61, 1.00)])  // right A-frame leg
+            rectShape(0.26, 1.00, 0.74, 0.955)         // base platform
+
         case .gatewayArch:
             bandArch(&p, pt: pt, from: (0.28, 1.0), to: (0.72, 1.0), peakY: 0.05, thickness: 0.03)
 

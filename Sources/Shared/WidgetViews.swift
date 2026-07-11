@@ -15,6 +15,7 @@ struct WelkinEntry: TimelineEntry {
     let sky: SkyMood
     let aqi: Int?
     let unitSymbol: String
+    let dish: Dish
     let isPlaceholder: Bool
 
     static let placeholder = WelkinEntry(
@@ -27,8 +28,30 @@ struct WelkinEntry: TimelineEntry {
         sky: .clearDay,
         aqi: 42,
         unitSymbol: "°F",
+        dish: Dish(emoji: "🍕", name: "New York Slice",
+                   note: "Grab a wide, foldable slice from a corner pizzeria."),
         isPlaceholder: true
     )
+}
+
+/// The day's local dish, shown as a compact one-line badge in the widgets.
+struct FlavorLine: View {
+    let dish: Dish
+    var size: CGFloat = 11
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(dish.emoji)
+                .font(.system(size: size))
+            Text(dish.name)
+                .font(.system(size: size, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Local flavor: \(dish.name)")
+    }
 }
 
 // MARK: - Presentational views
@@ -152,12 +175,14 @@ struct SmallWidget: View {
                 Spacer(minLength: 0)
                 HStack(alignment: .firstTextBaseline) {
                     Text("\(entry.temperature)°")
-                        .font(.system(size: 42, weight: .thin, design: .rounded))
+                        .font(.system(size: 40, weight: .thin, design: .rounded))
                     Spacer()
                     Text("H:\(entry.high)° L:\(entry.low)°")
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                 }
+                FlavorLine(dish: entry.dish, size: 10)
+                    .padding(.top, 1)
             }
             .foregroundStyle(.white)
         }
@@ -192,6 +217,8 @@ struct MediumWidget: View {
                         AQIBadge(aqi: aqi)
                     }
                 }
+                FlavorLine(dish: entry.dish, size: 11)
+                    .padding(.top, 2)
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity, alignment: .leading)
