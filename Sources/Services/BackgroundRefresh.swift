@@ -26,12 +26,17 @@ enum BackgroundRefresh {
         try? BGTaskScheduler.shared.submit(request)
     }
 
+    /// BGAppRefreshTask isn't Sendable, so ferry it into the Task in a box —
+    /// the same trick the widget uses for its completion handler.
+    private struct Sendify<T>: @unchecked Sendable { let value: T }
+
     private static func handle(_ task: BGAppRefreshTask) {
         schedule()   // always queue the next one first
 
+        let boxed = Sendify(value: task)
         let work = Task {
             await runChecks()
-            task.setTaskCompleted(success: true)
+            boxed.value.setTaskCompleted(success: true)
         }
         task.expirationHandler = { work.cancel() }
     }
