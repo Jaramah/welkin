@@ -119,6 +119,9 @@ enum LandmarkKind: Sendable, CaseIterable {
 struct Landmark: Sendable {
     let kind: LandmarkKind
     let name: String        // subtitle shown under the city name
+    /// Seeds the procedural skyline so each city's is its own. Ignored by the
+    /// hand-drawn landmarks, which are the same building wherever you view them.
+    var seed: Int = 0
 }
 
 enum LandmarkCatalog {
@@ -280,21 +283,97 @@ enum LandmarkCatalog {
             return rotated(best.entry, on: date)
         }
 
-        // 3) Generic skyline for anywhere else.
-        return Landmark(kind: .skyline, name: "\(place.name) Skyline")
+        // 3) Nothing matched. Rather than hand every unknown city on earth the same
+        //    eleven boxes, fall back to an archetype from its own part of the world,
+        //    and seed the skyline from the city name so at least it is *its* skyline.
+        let seed = stableSeed(place.name)
+        if let regional = regionKind(for: place) {
+            return Landmark(kind: regional, name: regional.displayName, seed: seed)
+        }
+        return Landmark(kind: .skyline, name: "\(place.name) Skyline", seed: seed)
+    }
+
+    /// A same-continent archetype for a city we have no icon for. Better a mosque
+    /// over Tabriz and a stupa over Pokhara than a Manhattan skyline over both.
+    private static func regionKind(for place: Place) -> LandmarkKind? {
+        guard let country = place.country?.lowercased() else { return nil }
+        func any(_ names: [String]) -> Bool { names.contains { country.contains($0) } }
+
+        switch true {
+        case any(["saudi", "emirat", "qatar", "kuwait", "bahrain", "oman", "yemen",
+                  "iran", "iraq", "jordan", "syria", "lebanon", "palestin",
+                  "pakistan", "bangladesh", "afghan", "azerbaijan",
+                  "egypt", "morocco", "algeria", "tunisia", "libya", "sudan",
+                  "uzbek", "turkmen", "tajik", "kyrgyz", "malaysia", "brunei", "maldiv"]):
+            return .mosque
+
+        case any(["nepal", "bhutan", "myanmar", "burma", "sri lanka", "laos", "cambodia", "mongolia"]):
+            return .stupa
+
+        case any(["vietnam", "china", "taiwan", "hong kong", "macau", "japan", "korea"]):
+            return .pagoda
+
+        case any(["russia", "ukraine", "belarus", "serbia", "bulgaria", "macedonia",
+                  "montenegro", "georgia", "armenia", "moldova", "greece", "cyprus"]):
+            return .onionDomes
+
+        case any(["norway", "sweden", "denmark", "finland", "iceland", "estonia", "latvia", "lithuania"]):
+            return .gabledHouses
+
+        case any(["switzerland", "austria", "liechtenstein", "slovenia", "nepal"]):
+            return .alpinePeaks
+
+        case any(["mexico", "guatemala", "honduras", "salvador", "nicaragua", "costa rica",
+                  "panama", "colombia", "venezuela", "ecuador", "peru", "bolivia",
+                  "paraguay", "uruguay", "argentina", "chile", "cuba", "dominican",
+                  "philippin"]):
+            return .colonialCathedral
+
+        case any(["kenya", "tanzania", "uganda", "ethiopia", "somalia", "rwanda", "burundi",
+                  "nigeria", "ghana", "senegal", "mali", "ivoire", "ivory", "cameroon",
+                  "zambia", "zimbabwe", "botswana", "namibia", "mozambique", "angola",
+                  "south africa", "congo", "malawi"]):
+            return .acaciaSavanna
+
+        case any(["poland", "czech", "slovak", "hungary", "romania", "croatia", "bosnia",
+                  "germany", "belgium", "france", "netherlands", "ireland", "portugal",
+                  "spain", "italy", "united kingdom", "luxembourg", "albania"]):
+            return .gothicCathedral
+
+        case any(["fiji", "samoa", "tonga", "vanuatu", "papua", "solomon", "jamaica",
+                  "bahamas", "barbados", "trinidad", "haiti", "puerto rico", "seychelles",
+                  "mauritius", "sri lanka"]):
+            return .palmTrees
+
+        default:
+            return nil     // USA, Canada, Australia, Gulf megacities... a skyline is honest
+        }
+    }
+
+    /// A hash that is stable across launches. Swift's own String.hashValue is seeded
+    /// randomly per process, so a city's skyline would be different every time the
+    /// app started.
+    static func stableSeed(_ text: String) -> Int {
+        var hash: UInt64 = 0xcbf2_9ce4_8422_2325          // FNV-1a
+        for byte in text.lowercased().utf8 {
+            hash = (hash ^ UInt64(byte)) &* 0x100_0000_01b3
+        }
+        return Int(truncatingIfNeeded: hash & 0x7fff_ffff)
     }
 
     /// Pick one of the city's landmarks based on the day of the year, so it
     /// changes daily but stays stable for the whole day.
     private static func rotated(_ entry: Entry, on date: Date) -> Landmark {
+        let seed = stableSeed(entry.city)
         guard entry.kinds.count > 1 else {
             let kind = entry.kinds.first ?? .skyline
             let name = kind == .skyline ? "\(entry.city) Skyline" : kind.displayName
-            return Landmark(kind: kind, name: name)
+            return Landmark(kind: kind, name: name, seed: seed)
         }
         let day = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 1
         let kind = entry.kinds[(day - 1) % entry.kinds.count]
-        return Landmark(kind: kind, name: kind.displayName)
+        let name = kind == .skyline ? "\(entry.city) Skyline" : kind.displayName
+        return Landmark(kind: kind, name: name, seed: seed)
     }
 
     private static func haversineKm(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {

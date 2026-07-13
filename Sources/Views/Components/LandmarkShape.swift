@@ -5,6 +5,8 @@ import SwiftUI
 /// so inner cut-outs (arches, clock faces) read as holes.
 struct LandmarkShape: Shape {
     let kind: LandmarkKind
+    /// Seeds the procedural skyline. Same city, same skyline, every launch.
+    var seed: Int = 0
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
@@ -829,18 +831,56 @@ struct LandmarkShape: Shape {
             }
 
         case .skyline:
-            let heights: [CGFloat] = [0.55, 0.35, 0.62, 0.28, 0.48, 0.20, 0.58, 0.40, 0.66, 0.32, 0.50]
-            let n = heights.count
-            let bw = 1.0 / CGFloat(n)
-            for (i, h) in heights.enumerated() {
-                let x0 = CGFloat(i) * bw + 0.004
-                rectShape(x0, 1.0, x0 + bw - 0.008, h)
-                // occasional antenna / spire
-                if i % 3 == 1 {
-                    let cx = x0 + bw / 2
-                    rectShape(cx - 0.004, h, cx + 0.004, h - 0.06)
-                }
+            // Every unnamed city used to get this exact row of eleven boxes, which
+            // made Boston, Houston and Melbourne pixel-identical. Grow the skyline
+            // from the city's seed instead: same city, same skyline, but its own.
+            var rng = UInt64(truncatingIfNeeded: seed) &* 2 &+ 1     // never zero
+            func rand() -> CGFloat {
+                rng = rng &* 6364136223846793005 &+ 1442695040888963407
+                return CGFloat((rng >> 33) % 10_000) / 10_000
             }
+
+            var x: CGFloat = 0.005
+            var tallest: CGFloat = 1.0
+            var tallestX: CGFloat = 0.5
+
+            while x < 0.985 {
+                let w = 0.055 + rand() * 0.055
+                let x1 = min(x + w, 0.985)
+                // Height rises toward the middle of the frame, like a real downtown.
+                let centrality = 1.0 - abs((x + x1) / 2 - 0.5) * 1.6
+                let top = 0.72 - (0.16 + rand() * 0.34) * max(centrality, 0.15) - rand() * 0.10
+                rectShape(x, 1.0, x1, top)
+
+                let cx = (x + x1) / 2
+                if top < tallest { tallest = top; tallestX = cx }
+
+                let roof = rand()
+                if roof > 0.80 {                       // spire
+                    rectShape(cx - 0.005, top, cx + 0.005, max(top - 0.10 - rand() * 0.08, 0.02))
+                } else if roof > 0.62 {                // stepped setback
+                    rectShape(x + w * 0.22, top, x1 - w * 0.22, top - 0.05)
+                } else if roof > 0.50 {                // pitched roof
+                    poly([(x, top), (x1, top), (cx, top - 0.06)])
+                }
+
+                // Sparse lit windows, punched through as holes by the even-odd fill.
+                let cols = w > 0.085 ? 3 : 2
+                var wy = top + 0.075
+                while wy < 0.93 {
+                    for c in 0..<cols {
+                        if rand() > 0.45 { continue }
+                        let wx = x + w * (0.20 + CGFloat(c) * 0.28)
+                        rectShape(wx, wy, wx + 0.014, wy + 0.030)
+                    }
+                    wy += 0.075
+                }
+                x = x1 + 0.006 + rand() * 0.008
+            }
+
+            // A single mast on the tallest tower, so the skyline has a peak.
+            rectShape(tallestX - 0.0035, tallest, tallestX + 0.0035, max(tallest - 0.13, 0.015))
+
         }
         return p
     }

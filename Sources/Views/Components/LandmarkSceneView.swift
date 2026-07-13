@@ -34,9 +34,9 @@ struct LandmarkSceneView: View {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
                     ZStack {
-                        LandmarkShape(kind: landmark.kind)
+                        LandmarkShape(kind: landmark.kind, seed: landmark.seed)
                             .fill(silhouetteGradient, style: FillStyle(eoFill: true))
-                        LandmarkShape(kind: landmark.kind)
+                        LandmarkShape(kind: landmark.kind, seed: landmark.seed)
                             .stroke(Color.white.opacity(0.16), lineWidth: 0.8)
                     }
                     .frame(height: h * 0.82)

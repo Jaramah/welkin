@@ -69,6 +69,7 @@ struct WidgetSky: View {
 /// Static (non-animated) landmark scene for the widget.
 struct StaticLandmark: View {
     let kind: LandmarkKind
+    var seed: Int = 0
     let isDay: Bool
 
     var body: some View {
@@ -85,11 +86,11 @@ struct StaticLandmark: View {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
                     ZStack {
-                        LandmarkShape(kind: kind)
+                        LandmarkShape(kind: kind, seed: seed)
                             .fill(LinearGradient(colors: [.black.opacity(0.55), .black.opacity(0.9)],
                                                  startPoint: .top, endPoint: .bottom),
                                   style: FillStyle(eoFill: true))
-                        LandmarkShape(kind: kind)
+                        LandmarkShape(kind: kind, seed: seed)
                             .stroke(Color.white.opacity(0.16), lineWidth: 0.7)
                     }
                     .frame(height: h * 0.78)
@@ -165,7 +166,7 @@ struct SmallWidget: View {
 
     var body: some View {
         ZStack {
-            StaticLandmark(kind: entry.landmark.kind, isDay: entry.code.isDay)
+            StaticLandmark(kind: entry.landmark.kind, seed: entry.landmark.seed, isDay: entry.code.isDay)
                 .opacity(0.9)
             VStack(alignment: .leading, spacing: 0) {
                 Text(entry.placeName)
@@ -196,7 +197,7 @@ struct MediumWidget: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            StaticLandmark(kind: entry.landmark.kind, isDay: entry.code.isDay)
+            StaticLandmark(kind: entry.landmark.kind, seed: entry.landmark.seed, isDay: entry.code.isDay)
                 .frame(maxWidth: .infinity)
 
             VStack(alignment: .leading, spacing: 3) {
