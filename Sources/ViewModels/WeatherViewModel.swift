@@ -14,12 +14,19 @@ final class WeatherViewModel {
         didSet {
             UserDefaults.standard.set(unit.rawValue, forKey: "unit")
             if oldValue != unit, let place = currentPlace {
-                Task { await load(place: place) }
+                Task { await load(place: place, followingLocation: isFollowingLocation) }
             }
         }
     }
 
     private(set) var currentPlace: Place?
+    /// True when `currentPlace` came from GPS rather than a search result. A refresh
+    /// then has to re-acquire the position — otherwise the app stays pinned to
+    /// wherever you were standing the first time it looked, even after you move.
+    private(set) var isFollowingLocation = false
+    /// A refresh that failed while usable data is already on screen. Surfaced as a
+    /// banner instead of replacing the forecast with a full-screen error.
+    var refreshError: String?
     /// Singapore-only area nowcast (nil elsewhere or while unavailable).
     private(set) var regionalNowcast: RegionalNowcast?
     private let service = WeatherService()
@@ -36,8 +43,9 @@ final class WeatherViewModel {
         self.unit = saved.flatMap(TemperatureUnit.init) ?? .fahrenheit
     }
 
-    func load(place: Place) async {
+    func load(place: Place, followingLocation: Bool = false) async {
         currentPlace = place
+        isFollowingLocation = followingLocation
         // Only show the full-screen loader on a cold start. On a refresh or unit
         // toggle, keep the current content visible so the screen doesn't flash
         // (pull-to-refresh shows its own spinner).
@@ -45,6 +53,7 @@ final class WeatherViewModel {
         do {
             let bundle = try await service.fetch(for: place, unit: unit)
             phase = .loaded(bundle)
+            refreshError = nil
             loadRegionalNowcast(for: place)
             evaluateAlerts(for: bundle)
             // Hand the current location + unit to the widget and refresh it.
@@ -53,7 +62,19 @@ final class WeatherViewModel {
                                                 longitude: place.longitude))
             SharedStore.save(unit: unit.rawValue)
             WidgetCenter.shared.reloadAllTimelines()
+        } catch is CancellationError {
+            // Superseded by a newer request — leave whatever is on screen alone.
         } catch {
+            report(error)
+        }
+    }
+
+    /// Never throw away a good forecast because a refresh failed: if there is
+    /// already something on screen, degrade to a banner instead of an error page.
+    private func report(_ error: Error) {
+        if bundle != nil {
+            refreshError = error.localizedDescription
+        } else {
             phase = .failed(error.localizedDescription)
         }
     }
@@ -94,9 +115,11 @@ final class WeatherViewModel {
         if bundle == nil { phase = .loading }
         do {
             let coord = try await location.requestCurrentLocation()
-            await load(place: namedPlace(for: coord))
+            await load(place: namedPlace(for: coord), followingLocation: true)
+        } catch is CancellationError {
+            // Superseded — keep the current screen.
         } catch {
-            phase = .failed(error.localizedDescription)
+            report(error)
         }
     }
 

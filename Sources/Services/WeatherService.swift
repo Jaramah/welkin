@@ -2,14 +2,30 @@ import Foundation
 
 enum WeatherError: LocalizedError {
     case badURL
+    case offline
+    case timedOut
+    case rateLimited
+    case server(Int)
     case badResponse
     case decoding
 
     var errorDescription: String? {
         switch self {
         case .badURL: return "Could not build the request."
+        case .offline: return "You appear to be offline. Check your connection and try again."
+        case .timedOut: return "The request timed out. Try again."
+        case .rateLimited: return "Too many requests just now. Give it a minute and try again."
+        case .server(let code): return "The weather service returned an error (\(code))."
         case .badResponse: return "The weather service is unavailable right now."
         case .decoding: return "Received an unexpected response."
+        }
+    }
+
+    /// Worth retrying automatically; a 4xx or a decode failure is not.
+    var isTransient: Bool {
+        switch self {
+        case .timedOut, .server(_): return true
+        default: return false
         }
     }
 }
@@ -90,16 +106,40 @@ struct WeatherService {
 
     // MARK: Networking
 
-    private func get<T: Decodable>(_ comps: URLComponents, as: T.Type) async throws -> T {
+    /// One retry for genuinely transient failures (timeout, 5xx). A refresh that
+    /// blips shouldn't put an error on screen when trying again would have worked.
+    private func get<T: Decodable>(_ comps: URLComponents, as type: T.Type) async throws -> T {
+        do {
+            return try await attempt(comps, as: type)
+        } catch let error as WeatherError where error.isTransient {
+            try await Task.sleep(for: .milliseconds(600))
+            return try await attempt(comps, as: type)
+        }
+    }
+
+    private func attempt<T: Decodable>(_ comps: URLComponents, as: T.Type) async throws -> T {
         guard let url = comps.url else { throw WeatherError.badURL }
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await URLSession.shared.data(from: url)
-        } catch {
-            throw WeatherError.badResponse
+        } catch let error as URLError {
+            // Cancellation is not a failure — it means a newer request superseded
+            // this one (or the view went away). Reporting it as "the weather service
+            // is unavailable" is a lie that puts a scary error on a healthy screen.
+            switch error.code {
+            case .cancelled: throw CancellationError()
+            case .notConnectedToInternet, .dataNotAllowed, .networkConnectionLost:
+                throw WeatherError.offline
+            case .timedOut: throw WeatherError.timedOut
+            default: throw WeatherError.badResponse
+            }
+        } catch is CancellationError {
+            throw CancellationError()
         }
-        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-            throw WeatherError.badResponse
+        guard let http = response as? HTTPURLResponse else { throw WeatherError.badResponse }
+        guard (200...299).contains(http.statusCode) else {
+            if http.statusCode == 429 { throw WeatherError.rateLimited }
+            throw WeatherError.server(http.statusCode)
         }
         do {
             return try JSONDecoder().decode(T.self, from: data)

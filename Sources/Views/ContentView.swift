@@ -66,6 +66,11 @@ struct ContentView: View {
         let timezone = bundle.timezone
         ScrollView(showsIndicators: false) {
             VStack(spacing: 16) {
+                if let message = viewModel.refreshError {
+                    RefreshErrorBanner(message: message)
+                        .padding(.top, 4)
+                }
+
                 CurrentWeatherView(place: bundle.place, current: bundle.current,
                                    unit: viewModel.unit, scrollOffset: scrollY)
                     .padding(.top, 4)
@@ -144,8 +149,11 @@ struct ContentView: View {
         }
     }
 
+    /// When the shown place came from GPS, a refresh has to ask CoreLocation again —
+    /// re-fetching the old coordinates would keep reporting the neighbourhood you
+    /// were standing in when the app first launched. A searched city stays put.
     private func reload() async {
-        if let place = viewModel.currentPlace {
+        if let place = viewModel.currentPlace, !viewModel.isFollowingLocation {
             await viewModel.load(place: place)
         } else {
             await viewModel.loadCurrentLocation()
@@ -194,5 +202,28 @@ private struct ErrorView: View {
                     .foregroundStyle(Color.welkinSecondary)
             }
         }
+    }
+}
+
+/// Shown when a refresh fails but a good forecast is already on screen. The data
+/// below is still valid, just not fresh — so this warns without hiding it.
+private struct RefreshErrorBanner: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            Text(message)
+                .font(Theme.body(13))
+                .foregroundStyle(Color.welkinSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .glassSurface(cornerRadius: 16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Couldn't refresh. \(message)")
     }
 }
