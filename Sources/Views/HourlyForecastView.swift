@@ -35,6 +35,13 @@ struct HourlyForecastView: View {
                 }
                 .padding(.vertical, 4)
             }
+
+            // The headline condition can come from a local met service (NEA in
+            // Singapore) while these hours come from the global model. Saying so
+            // turns a baffling contradiction into two clearly-sourced opinions.
+            Text("Open-Meteo model · next 24 hours")
+                .font(Theme.label(11))
+                .foregroundStyle(Color.welkinTertiary)
         }
     }
 

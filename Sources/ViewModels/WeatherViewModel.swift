@@ -91,11 +91,30 @@ final class WeatherViewModel {
             guard let self else { return }
             if let nowcast = try? await self.nea.twoHourNowcast() {
                 self.regionalNowcast = nowcast
+                self.applyNowcastToCurrent(nowcast, at: place)
                 // Re-run alerts now that we have the area-level nowcast, which
                 // gives a far better rain signal than the coarse hourly model.
                 if let bundle = self.bundle { self.evaluateAlerts(for: bundle) }
             }
         }
+    }
+
+    /// Inside NEA's 2-hour window, NEA wins.
+    ///
+    /// Open-Meteo is a global model on a ~10km grid — for Bedok it resolves to a
+    /// point several kilometres away, and it hedges with a light "drizzle" that the
+    /// official radar-backed nowcast flatly contradicts. NEA is the local met
+    /// service, is specific to your town, and updates every few minutes, so it is
+    /// the better answer for what the sky is doing right now. Temperature, wind and
+    /// the rest still come from the model; only the condition is replaced.
+    private func applyNowcastToCurrent(_ nowcast: RegionalNowcast, at place: Place) {
+        guard var bundle,
+              let area = nowcast.nearest(toLatitude: place.latitude, longitude: place.longitude)
+        else { return }
+
+        bundle.current.code = area.weatherCode(isDay: bundle.current.code.isDay)
+        bundle.current.sourceNote = "NEA nowcast · \(nowcast.validPeriodText)"
+        phase = .loaded(bundle)
     }
 
     /// Fire any due weather alerts. Cooldowns inside NotificationService stop

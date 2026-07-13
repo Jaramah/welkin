@@ -35,7 +35,10 @@ struct CurrentConditions: Sendable {
     let cloudCover: Int
     let precipitation: Double
     let uvIndex: Double
-    let code: WeatherCode
+    /// Overridden by the local met service where one is more authoritative than
+    /// the global model (NEA in Singapore), so `sourceNote` says where it came from.
+    var code: WeatherCode
+    var sourceNote: String? = nil
     let sunrise: Date?
     let sunset: Date?
     let high: Double
@@ -67,7 +70,7 @@ struct DayPoint: Identifiable, Sendable {
 struct WeatherBundle: Sendable {
     let place: Place
     let timezone: TimeZone     // the location's timezone — used for all time display
-    let current: CurrentConditions
+    var current: CurrentConditions
     let hourly: [HourPoint]      // next 24h from now
     let daily: [DayPoint]        // 7 days
     let aqiNow: Int?

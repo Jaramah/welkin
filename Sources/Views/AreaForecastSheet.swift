@@ -5,6 +5,11 @@ import SwiftUI
 struct AreaForecastSheet: View {
     let place: Place
     let unit: TemperatureUnit
+    /// NEA's reading for this area. It overrides the global model's condition here
+    /// for the same reason it does on the main screen — otherwise tapping Bedok
+    /// would contradict the very card you tapped it from.
+    let area: RegionalNowcast.AreaForecast
+    let validPeriod: String
 
     @Environment(\.dismiss) private var dismiss
     @State private var phase: Phase = .loading
@@ -87,7 +92,14 @@ struct AreaForecastSheet: View {
 
     private func load() async {
         do {
-            phase = .loaded(try await WeatherService().fetch(for: place, unit: unit))
+            var bundle = try await WeatherService().fetch(for: place, unit: unit)
+            bundle.current.code = area.weatherCode(isDay: bundle.current.code.isDay)
+            bundle.current.sourceNote = validPeriod.isEmpty
+                ? "NEA nowcast"
+                : "NEA nowcast · \(validPeriod)"
+            phase = .loaded(bundle)
+        } catch is CancellationError {
+            // Sheet dismissed mid-flight; nothing to report.
         } catch {
             phase = .failed(error.localizedDescription)
         }

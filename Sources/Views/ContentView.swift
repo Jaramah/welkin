@@ -5,7 +5,7 @@ struct ContentView: View {
     @State private var showSearch = false
     @State private var scrollY: CGFloat = 0
     /// A Regional Nowcast area being previewed in a sheet (nil when closed).
-    @State private var areaPlace: Place?
+    @State private var selectedArea: RegionalNowcast.AreaForecast?
 
     private var mood: SkyMood {
         viewModel.bundle?.current.code.sky ?? .clearNight
@@ -55,8 +55,11 @@ struct ContentView: View {
                 }
             }
         }
-        .sheet(item: $areaPlace) { place in
-            AreaForecastSheet(place: place, unit: viewModel.unit)
+        .sheet(item: $selectedArea) { area in
+            if let place = area.place {
+                AreaForecastSheet(place: place, unit: viewModel.unit, area: area,
+                                  validPeriod: viewModel.regionalNowcast?.validPeriodText ?? "")
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -87,8 +90,8 @@ struct ContentView: View {
                 if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
                     // Opens the area in a sheet — it must not replace the location
                     // the main screen is showing.
-                    RegionalNowcastView(nowcast: nowcast) { place in
-                        areaPlace = place
+                    RegionalNowcastView(nowcast: nowcast) { area in
+                        selectedArea = area
                     }
                 }
 

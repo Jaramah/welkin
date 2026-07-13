@@ -4,7 +4,7 @@ import SwiftUI
 struct RegionalNowcastView: View {
     let nowcast: RegionalNowcast
     /// Tapping an area opens its full forecast.
-    var onSelect: (Place) -> Void
+    var onSelect: (RegionalNowcast.AreaForecast) -> Void
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -15,15 +15,15 @@ struct RegionalNowcastView: View {
         GlassCard(title: "Regional Nowcast", systemImage: "map") {
             VStack(alignment: .leading, spacing: 14) {
                 if !nowcast.validPeriodText.isEmpty {
-                    Text("Next 2 hours · \(nowcast.validPeriodText)")
+                    Text("NEA · \(nowcast.validPeriodText)")
                         .font(Theme.label(12))
                         .foregroundStyle(Color.welkinSecondary)
                 }
 
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                     ForEach(nowcast.areas) { area in
-                        if let place = area.place {
-                            Button { onSelect(place) } label: {
+                        if area.place != nil {
+                            Button { onSelect(area) } label: {
                                 AreaRow(area: area, tappable: true)
                             }
                             .buttonStyle(.plain)

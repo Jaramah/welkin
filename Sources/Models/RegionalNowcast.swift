@@ -21,6 +21,57 @@ struct RegionalNowcast: Sendable {
             return Place(name: name, country: "Singapore",
                          latitude: latitude, longitude: longitude)
         }
+
+        /// NEA's forecast expressed as a WMO code, so it can drive the same icon,
+        /// label and background palette the rest of the app already understands.
+        func weatherCode(isDay: Bool) -> WeatherCode {
+            WeatherCode(raw: RegionalNowcast.wmoCode(for: forecast), isDay: isDay)
+        }
+    }
+
+    /// The area nearest a coordinate. NEA's 47 towns blanket the island, so the
+    /// closest one is the right nowcast for wherever you are standing.
+    func nearest(toLatitude lat: Double, longitude lon: Double) -> AreaForecast? {
+        areas
+            .compactMap { area -> (AreaForecast, Double)? in
+                guard let alat = area.latitude, let alon = area.longitude else { return nil }
+                // Planar distance is fine at this scale (Singapore is ~50 km across);
+                // scale longitude by cos(lat) so it isn't over-weighted.
+                let dy = alat - lat
+                let dx = (alon - lon) * cos(lat * .pi / 180)
+                return (area, dy * dy + dx * dx)
+            }
+            .min { $0.1 < $1.1 }?
+            .0
+    }
+
+    /// Map NEA's vocabulary to the WMO codes Open-Meteo uses.
+    /// Order matters: check the most specific conditions first.
+    static func wmoCode(for forecast: String) -> Int {
+        let f = forecast.lowercased()
+        switch true {
+        case f.contains("gusty"):                       return 99   // hail/severe storm
+        case f.contains("heavy thunder"):               return 96
+        case f.contains("thunder"):                     return 95
+        case f.contains("heavy shower"):                return 81
+        case f.contains("passing shower"), f.contains("light shower"):
+                                                        return 80
+        case f.contains("shower"):                      return 80
+        case f.contains("heavy rain"):                  return 65
+        case f.contains("moderate rain"):               return 63
+        case f.contains("light rain"), f.contains("drizzle"):
+                                                        return 51
+        case f.contains("rain"):                        return 63
+        case f.contains("fog"), f.contains("mist"):     return 45
+        case f.contains("haz"):                         return 45
+        case f.contains("overcast"):                    return 3
+        case f.contains("partly cloudy"):               return 2
+        case f.contains("cloudy"):                      return 3
+        case f.contains("wind"):                        return 3
+        case f.contains("fair"), f.contains("clear"), f.contains("sunny"):
+                                                        return 0
+        default:                                        return 2
+        }
     }
 
     /// Map NEA's forecast vocabulary to an SF Symbol, day/night aware.

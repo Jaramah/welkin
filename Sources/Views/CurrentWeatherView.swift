@@ -20,6 +20,14 @@ struct CurrentWeatherView: View {
                 .font(Theme.body(17))
                 .foregroundStyle(Color.welkinSecondary)
 
+            // Named only when a local met service overrode the global model, so it
+            // is obvious why this can differ from the model-driven hourly strip.
+            if let note = current.sourceNote {
+                Text(note)
+                    .font(Theme.label(11))
+                    .foregroundStyle(Color.welkinTertiary)
+            }
+
             HStack(spacing: 16) {
                 Text("H:\(tempString(current.high))")
                 Text("L:\(tempString(current.low))")
