@@ -830,6 +830,26 @@ struct LandmarkShape: Shape {
                 x += w + 0.015
             }
 
+        case .hinduTemple:
+            // A gopuram: tiered tower over a temple wall, with roof finials.
+            rectShape(0.06, 1.0, 0.94, 0.84)                 // compound wall
+            roundCircle(0.16, 0.80, 0.055)                   // corner shrines
+            roundCircle(0.84, 0.80, 0.055)
+            poly([(0.28, 0.84), (0.72, 0.84), (0.625, 0.20), (0.375, 0.20)])   // tower
+            for i in 0..<5 {                                 // tier bands (holes)
+                let t = CGFloat(i) / 5
+                let y = 0.30 + CGFloat(i) * 0.105
+                let half = 0.11 + t * 0.10                   // widens toward the base
+                rectShape(0.50 - half, y, 0.50 + half, y + 0.016)
+            }
+            rectShape(0.355, 0.20, 0.645, 0.13)              // barrel roof
+            for cx in [CGFloat(0.41), CGFloat(0.50), CGFloat(0.59)] {          // finials
+                poly([(cx - 0.019, 0.13), (cx + 0.019, 0.13), (cx, 0.04)])
+            }
+            p.move(to: pt(0.44, 1.0))                        // gateway (hole)
+            p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.72))
+            p.closeSubpath()
+
         case .skyline:
             // Every unnamed city used to get this exact row of eleven boxes, which
             // made Boston, Houston and Melbourne pixel-identical. Grow the skyline

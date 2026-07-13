@@ -24,7 +24,7 @@ enum LandmarkKind: Sendable, CaseIterable {
     /// the right continent — a generic glass-box city over Kathmandu or Nairobi reads
     /// as a bug, not a fallback.
     case mosque, stupa, pagoda, onionDomes, gothicCathedral, alpinePeaks
-    case colonialCathedral, acaciaSavanna, gabledHouses
+    case colonialCathedral, acaciaSavanna, gabledHouses, hinduTemple
     case skyline           // generic fallback
 
     /// Subtitle shown under the city name.
@@ -111,6 +111,7 @@ enum LandmarkKind: Sendable, CaseIterable {
         case .colonialCathedral: return "Colonial Cathedral"
         case .acaciaSavanna:     return "Acacia Sunset"
         case .gabledHouses:      return "Harbour Houses"
+        case .hinduTemple:       return "Temple Gopuram"
         case .skyline:           return "Skyline"
         }
     }
@@ -304,10 +305,15 @@ enum LandmarkCatalog {
                   "iran", "iraq", "jordan", "syria", "lebanon", "palestin",
                   "pakistan", "bangladesh", "afghan", "azerbaijan",
                   "egypt", "morocco", "algeria", "tunisia", "libya", "sudan",
-                  "uzbek", "turkmen", "tajik", "kyrgyz", "malaysia", "brunei", "maldiv"]):
+                  "uzbek", "turkmen", "tajik", "kyrgyz", "kazakh", "malaysia", "brunei", "maldiv",
+                  "indonesia", "turkey", "türkiye", "israel"]):
             return .mosque
 
-        case any(["nepal", "bhutan", "myanmar", "burma", "sri lanka", "laos", "cambodia", "mongolia"]):
+        case any(["india"]):
+            return .hinduTemple
+
+        case any(["thailand", "nepal", "bhutan", "myanmar", "burma", "sri lanka",
+                  "laos", "cambodia", "mongolia"]):
             return .stupa
 
         case any(["vietnam", "china", "taiwan", "hong kong", "macau", "japan", "korea"]):
@@ -320,13 +326,13 @@ enum LandmarkCatalog {
         case any(["norway", "sweden", "denmark", "finland", "iceland", "estonia", "latvia", "lithuania"]):
             return .gabledHouses
 
-        case any(["switzerland", "austria", "liechtenstein", "slovenia", "nepal"]):
+        case any(["switzerland", "austria", "liechtenstein", "slovenia", "new zealand"]):
             return .alpinePeaks
 
         case any(["mexico", "guatemala", "honduras", "salvador", "nicaragua", "costa rica",
                   "panama", "colombia", "venezuela", "ecuador", "peru", "bolivia",
                   "paraguay", "uruguay", "argentina", "chile", "cuba", "dominican",
-                  "philippin"]):
+                  "brazil", "brasil", "philippin"]):
             return .colonialCathedral
 
         case any(["kenya", "tanzania", "uganda", "ethiopia", "somalia", "rwanda", "burundi",
