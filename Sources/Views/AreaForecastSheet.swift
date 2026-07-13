@@ -92,12 +92,9 @@ struct AreaForecastSheet: View {
 
     private func load() async {
         do {
-            var bundle = try await WeatherService().fetch(for: place, unit: unit)
-            bundle.current.code = area.weatherCode(isDay: bundle.current.code.isDay)
-            bundle.current.sourceNote = validPeriod.isEmpty
-                ? "NEA nowcast"
-                : "NEA nowcast · \(validPeriod)"
-            phase = .loaded(bundle)
+            let fetched = try await WeatherService().fetch(for: place, unit: unit)
+            let nowcast = RegionalNowcast(validPeriodText: validPeriod, areas: [area])
+            phase = .loaded(fetched.applyingLocalNowcast(nowcast))
         } catch is CancellationError {
             // Sheet dismissed mid-flight; nothing to report.
         } catch {

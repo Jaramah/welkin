@@ -45,6 +45,16 @@ struct RegionalNowcast: Sendable {
             .0
     }
 
+    /// Fetch the local nowcast for a place, where one exists. Returns nil outside
+    /// coverage or if the service is unreachable — callers then keep the model's
+    /// own reading, so this can only ever improve the answer, never break it.
+    static func fetch(for place: Place) async -> RegionalNowcast? {
+        guard NEAService.covers(latitude: place.latitude, longitude: place.longitude) else {
+            return nil
+        }
+        return try? await NEAService().twoHourNowcast()
+    }
+
     /// Map NEA's vocabulary to the WMO codes Open-Meteo uses.
     /// Order matters: check the most specific conditions first.
     static func wmoCode(for forecast: String) -> Int {
@@ -102,5 +112,29 @@ struct RegionalNowcast: Sendable {
         default:
             return "cloud.fill"
         }
+    }
+}
+
+extension WeatherBundle {
+    /// Replace the global model's current condition with the local met service's
+    /// reading for the nearest area (NEA in Singapore).
+    ///
+    /// The app, the tapped-area sheet and the widget all go through this one
+    /// function. When only the app knew about NEA, the widget kept showing the
+    /// model's "drizzle" beside an app that said "partly cloudy" — the same
+    /// contradiction, one screen over. Keeping the rule in a single place is what
+    /// stops the two from drifting apart again.
+    func applyingLocalNowcast(_ nowcast: RegionalNowcast?) -> WeatherBundle {
+        guard let nowcast,
+              let area = nowcast.nearest(toLatitude: place.latitude,
+                                         longitude: place.longitude)
+        else { return self }
+
+        var updated = self
+        updated.current.code = area.weatherCode(isDay: current.code.isDay)
+        updated.current.sourceNote = nowcast.validPeriodText.isEmpty
+            ? "NEA nowcast"
+            : "NEA nowcast · \(nowcast.validPeriodText)"
+        return updated
     }
 }

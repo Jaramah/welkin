@@ -91,7 +91,7 @@ final class WeatherViewModel {
             guard let self else { return }
             if let nowcast = try? await self.nea.twoHourNowcast() {
                 self.regionalNowcast = nowcast
-                self.applyNowcastToCurrent(nowcast, at: place)
+                self.applyNowcastToCurrent(nowcast)
                 // Re-run alerts now that we have the area-level nowcast, which
                 // gives a far better rain signal than the coarse hourly model.
                 if let bundle = self.bundle { self.evaluateAlerts(for: bundle) }
@@ -107,14 +107,9 @@ final class WeatherViewModel {
     /// service, is specific to your town, and updates every few minutes, so it is
     /// the better answer for what the sky is doing right now. Temperature, wind and
     /// the rest still come from the model; only the condition is replaced.
-    private func applyNowcastToCurrent(_ nowcast: RegionalNowcast, at place: Place) {
-        guard var bundle,
-              let area = nowcast.nearest(toLatitude: place.latitude, longitude: place.longitude)
-        else { return }
-
-        bundle.current.code = area.weatherCode(isDay: bundle.current.code.isDay)
-        bundle.current.sourceNote = "NEA nowcast · \(nowcast.validPeriodText)"
-        phase = .loaded(bundle)
+    private func applyNowcastToCurrent(_ nowcast: RegionalNowcast) {
+        guard let bundle else { return }
+        phase = .loaded(bundle.applyingLocalNowcast(nowcast))
     }
 
     /// Fire any due weather alerts. Cooldowns inside NotificationService stop

@@ -33,9 +33,13 @@ struct WelkinProvider: TimelineProvider {
         )
         let unit = TemperatureUnit(rawValue: SharedStore.loadUnit()) ?? .fahrenheit
 
-        guard let bundle = try? await WeatherService().fetch(for: place, unit: unit) else {
+        guard let fetched = try? await WeatherService().fetch(for: place, unit: unit) else {
             return WelkinEntry.placeholder
         }
+        // Same rule as the app: where a local met service covers this place, its
+        // reading beats the global model. Without this the widget contradicts the
+        // app it sits next to on the home screen.
+        let bundle = fetched.applyingLocalNowcast(await RegionalNowcast.fetch(for: place))
         let c = bundle.current
         return WelkinEntry(
             date: .now,
