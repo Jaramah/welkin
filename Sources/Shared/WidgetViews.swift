@@ -15,7 +15,7 @@ struct WelkinEntry: TimelineEntry {
     let sky: SkyMood
     let aqi: Int?
     let unitSymbol: String
-    let dish: Dish
+    let fact: Fact
     let isPlaceholder: Bool
 
     static let placeholder = WelkinEntry(
@@ -28,29 +28,31 @@ struct WelkinEntry: TimelineEntry {
         sky: .clearDay,
         aqi: 42,
         unitSymbol: "°F",
-        dish: Dish(emoji: "🍕", name: "New York Slice",
-                   note: "Grab a wide, foldable slice from a corner pizzeria."),
+        fact: Fact(emoji: "🌳", text: "Central Park is entirely man-made."),
         isPlaceholder: true
     )
 }
 
-/// The day's local dish, shown as a compact one-line badge in the widgets.
-struct FlavorLine: View {
-    let dish: Dish
+/// The day's fact about this place, as a compact badge in the widgets. Widgets are
+/// small, so this truncates — the full text lives in the app.
+struct FactLine: View {
+    let fact: Fact
     var size: CGFloat = 11
+    var lineLimit: Int = 2
 
     var body: some View {
-        HStack(spacing: 4) {
-            Text(dish.emoji)
+        HStack(alignment: .top, spacing: 4) {
+            Text(fact.emoji)
                 .font(.system(size: size))
-            Text(dish.name)
-                .font(.system(size: size, weight: .semibold, design: .rounded))
+            Text(fact.text)
+                .font(.system(size: size, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .lineLimit(lineLimit)
+                .minimumScaleFactor(0.75)
+                .multilineTextAlignment(.leading)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Local flavor: \(dish.name)")
+        .accessibilityLabel("Did you know: \(fact.text)")
     }
 }
 
@@ -181,7 +183,7 @@ struct SmallWidget: View {
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                 }
-                FlavorLine(dish: entry.dish, size: 10)
+                FactLine(fact: entry.fact, size: 9, lineLimit: 2)
                     .padding(.top, 1)
             }
             .foregroundStyle(.white)
@@ -217,7 +219,7 @@ struct MediumWidget: View {
                         AQIBadge(aqi: aqi)
                     }
                 }
-                FlavorLine(dish: entry.dish, size: 11)
+                FactLine(fact: entry.fact, size: 10, lineLimit: 2)
                     .padding(.top, 2)
             }
             .foregroundStyle(.white)

@@ -534,6 +534,300 @@ struct LandmarkShape: Shape {
             archHole(&p, pt: pt, x0: 0.44, x1: 0.56, baseY: 1.0, springY: 0.52, apexY: 0.34)
             domeHalf(&p, pt: pt, cx: 0.50, baseY: 0.22, rx: 0.04, height: 0.05)
 
+
+        // MARK: - Icons for cities that were stuck on the generic skyline
+
+        case .stStephens:
+            // Vienna: one soaring south tower, steep patterned roof, stubby north tower.
+            rectShape(0.30, 1.0, 0.72, 0.66)              // nave
+            poly([(0.28, 0.66), (0.74, 0.66), (0.51, 0.34)])  // steep roof
+            rectShape(0.60, 0.66, 0.72, 0.30)             // south tower shaft
+            poly([(0.585, 0.30), (0.735, 0.30), (0.66, 0.02)]) // spire
+            rectShape(0.30, 0.66, 0.40, 0.44)             // north tower
+            poly([(0.29, 0.44), (0.41, 0.44), (0.35, 0.34)])
+            circle(0.66, 0.20, 0.018)                     // spire window (hole)
+
+        case .charlesBridge:
+            // Prague: arched span between two gate towers.
+            rectShape(0.0, 0.62, 1.0, 0.70)               // deck
+            for i in 0..<4 {                              // arches (holes)
+                let cx = 0.26 + CGFloat(i) * 0.17
+                p.move(to: pt(cx - 0.06, 1.0))
+                p.addQuadCurve(to: pt(cx + 0.06, 1.0), control: pt(cx, 0.62))
+                p.closeSubpath()
+            }
+            rectShape(0.0, 0.70, 1.0, 1.0)                // pier wall below deck
+            rectShape(0.09, 0.62, 0.21, 0.24)             // west tower
+            poly([(0.075, 0.24), (0.225, 0.24), (0.15, 0.06)])
+            rectShape(0.79, 0.62, 0.91, 0.30)             // east tower
+            poly([(0.775, 0.30), (0.925, 0.30), (0.85, 0.14)])
+
+        case .duomoMilano:
+            // Milan: a forest of gothic pinnacles over a wide facade.
+            rectShape(0.14, 1.0, 0.86, 0.58)
+            for i in 0..<9 {                              // pinnacles, tallest at centre
+                let x = 0.18 + CGFloat(i) * 0.08
+                let d = abs(CGFloat(i) - 4) / 4
+                let top = 0.14 + d * 0.30
+                rectShape(x - 0.014, 0.58, x + 0.014, top + 0.06)
+                poly([(x - 0.022, top + 0.06), (x + 0.022, top + 0.06), (x, top)])
+            }
+            for i in 0..<3 {                              // doorways (holes)
+                let cx = 0.34 + CGFloat(i) * 0.16
+                p.move(to: pt(cx - 0.035, 1.0))
+                p.addQuadCurve(to: pt(cx + 0.035, 1.0), control: pt(cx, 0.74))
+                p.closeSubpath()
+            }
+
+        case .frauenkirche:
+            // Munich: twin brick towers under copper onion domes.
+            rectShape(0.30, 1.0, 0.70, 0.70)              // nave
+            for cx in [CGFloat(0.36), CGFloat(0.64)] {
+                rectShape(cx - 0.075, 1.0, cx + 0.075, 0.34)   // tower
+                roundCircle(cx, 0.28, 0.075)                   // onion dome
+                poly([(cx - 0.012, 0.24), (cx + 0.012, 0.24), (cx, 0.10)])  // finial
+            }
+
+        case .puertaAlcala:
+            // Madrid: a triumphal gate — three arches, two lintels.
+            rectShape(0.06, 1.0, 0.94, 0.30)
+            rectShape(0.02, 0.30, 0.98, 0.22)             // cornice
+            poly([(0.36, 0.22), (0.64, 0.22), (0.64, 0.12), (0.36, 0.12)])  // attic
+            p.move(to: pt(0.34, 1.0))                     // central arch (hole)
+            p.addQuadCurve(to: pt(0.66, 1.0), control: pt(0.50, 0.34))
+            p.closeSubpath()
+            for cx in [CGFloat(0.18), CGFloat(0.82)] {    // side arches (holes)
+                p.move(to: pt(cx - 0.07, 1.0))
+                p.addQuadCurve(to: pt(cx + 0.07, 1.0), control: pt(cx, 0.52))
+                p.closeSubpath()
+            }
+
+        case .hapennyBridge:
+            // Dublin: a single cast-iron arch with lamp posts.
+            p.move(to: pt(0.08, 0.86))                    // arch band
+            p.addQuadCurve(to: pt(0.92, 0.86), control: pt(0.50, 0.30))
+            p.addLine(to: pt(0.92, 0.94))
+            p.addQuadCurve(to: pt(0.08, 0.94), control: pt(0.50, 0.40))
+            p.closeSubpath()
+            rectShape(0.04, 1.0, 0.12, 0.84)              // abutments
+            rectShape(0.88, 1.0, 0.96, 0.84)
+            for cx in [CGFloat(0.20), CGFloat(0.50), CGFloat(0.80)] {   // lamps
+                let y: CGFloat = cx == 0.50 ? 0.42 : 0.60
+                rectShape(cx - 0.007, y, cx + 0.007, y - 0.12)
+                circle(cx, y - 0.15, 0.022)
+            }
+
+        case .obelisco:
+            // Buenos Aires: a plain white needle on a plaza.
+            poly([(0.44, 0.94), (0.56, 0.94), (0.535, 0.06), (0.465, 0.06)])
+            poly([(0.465, 0.06), (0.535, 0.06), (0.50, 0.0)])   // capstone
+            rectShape(0.40, 1.0, 0.60, 0.94)                    // base
+            rectShape(0.30, 1.0, 0.70, 0.985)                   // plaza
+
+        case .elCapitolio:
+            // Havana: dome and colonnade.
+            rectShape(0.10, 1.0, 0.90, 0.72)              // podium
+            for i in 0..<8 {                              // columns
+                let x0 = 0.16 + CGFloat(i) * 0.09
+                rectShape(x0, 0.72, x0 + 0.035, 0.52)
+            }
+            rectShape(0.10, 0.52, 0.90, 0.46)             // entablature
+            poly([(0.30, 0.46), (0.70, 0.46), (0.50, 0.36)])    // pediment
+            roundCircle(0.50, 0.30, 0.13)                 // dome
+            rectShape(0.37, 0.36, 0.63, 0.30)             // drum
+            poly([(0.485, 0.17), (0.515, 0.17), (0.50, 0.06)])  // lantern
+
+        case .parliamentHungary:
+            // Budapest: central dome flanked by a long spiky Gothic Revival wing.
+            rectShape(0.02, 1.0, 0.98, 0.74)
+            for i in 0..<10 {                             // spires along the roof
+                let x = 0.07 + CGFloat(i) * 0.093
+                if abs(x - 0.50) < 0.10 { continue }      // leave room for the dome
+                rectShape(x - 0.012, 0.74, x + 0.012, 0.58)
+                poly([(x - 0.02, 0.58), (x + 0.02, 0.58), (x, 0.46)])
+            }
+            rectShape(0.40, 0.74, 0.60, 0.44)             // drum
+            roundCircle(0.50, 0.36, 0.10)                 // dome
+            poly([(0.487, 0.28), (0.513, 0.28), (0.50, 0.14)])  // spire
+
+        case .bayterek:
+            // Astana: a golden sphere cradled in a splayed white lattice.
+            poly([(0.34, 1.0), (0.40, 1.0), (0.485, 0.36), (0.455, 0.36)])   // left leg
+            poly([(0.66, 1.0), (0.60, 1.0), (0.515, 0.36), (0.545, 0.36)])   // right leg
+            rectShape(0.478, 1.0, 0.522, 0.36)            // core
+            roundCircle(0.50, 0.28, 0.115)                // sphere
+            poly([(0.492, 0.17), (0.508, 0.17), (0.50, 0.06)])   // mast
+
+        case .minarEPakistan:
+            // Lahore: a tapering minaret on a tiered platform.
+            rectShape(0.22, 1.0, 0.78, 0.94)              // platform
+            rectShape(0.30, 0.94, 0.70, 0.88)
+            poly([(0.435, 0.88), (0.565, 0.88), (0.535, 0.20), (0.465, 0.20)])  // shaft
+            rectShape(0.44, 0.24, 0.56, 0.20)             // balcony
+            poly([(0.465, 0.20), (0.535, 0.20), (0.50, 0.04)])  // crown
+            circle(0.50, 0.02, 0.016)
+
+        case .machuPicchu:
+            // Cusco: terraced ridge under Huayna Picchu's peak.
+            poly([(0.60, 1.0), (0.80, 0.14), (1.0, 1.0)])       // the peak behind
+            poly([(0.0, 1.0), (0.18, 0.50), (0.40, 1.0)])       // smaller peak
+            for i in 0..<5 {                                    // terraces
+                let y = 0.62 + CGFloat(i) * 0.075
+                rectShape(0.16 + CGFloat(i) * 0.03, y, 0.68 - CGFloat(i) * 0.02, y + 0.045)
+            }
+            rectShape(0.30, 0.62, 0.36, 0.55)                   // ruined walls
+            rectShape(0.44, 0.62, 0.50, 0.57)
+            rectShape(0.56, 0.62, 0.61, 0.56)
+
+        case .libertyBell:
+            // Philadelphia: the bell, crack and all.
+            rectShape(0.46, 0.06, 0.54, 0.16)             // yoke pin
+            rectShape(0.34, 0.16, 0.66, 0.22)             // headstock
+            poly([(0.30, 0.86), (0.36, 0.30), (0.64, 0.30), (0.70, 0.86)])   // body
+            rectShape(0.26, 0.86, 0.74, 0.94)             // lip
+            poly([(0.50, 0.86), (0.545, 0.60), (0.515, 0.60), (0.535, 0.36)])   // crack (hole)
+
+        // MARK: - Regional archetypes
+
+        case .mosque:
+            // Central dome, two minarets, arched arcade.
+            rectShape(0.20, 1.0, 0.80, 0.62)
+            roundCircle(0.50, 0.50, 0.155)                // main dome
+            poly([(0.487, 0.36), (0.513, 0.36), (0.50, 0.24)])  // finial
+            for cx in [CGFloat(0.10), CGFloat(0.90)] {    // minarets
+                rectShape(cx - 0.028, 1.0, cx + 0.028, 0.26)
+                rectShape(cx - 0.042, 0.34, cx + 0.042, 0.30)   // balcony
+                poly([(cx - 0.028, 0.26), (cx + 0.028, 0.26), (cx, 0.12)])
+            }
+            for i in 0..<3 {                              // arcade (holes)
+                let cx = 0.34 + CGFloat(i) * 0.16
+                p.move(to: pt(cx - 0.05, 1.0))
+                p.addQuadCurve(to: pt(cx + 0.05, 1.0), control: pt(cx, 0.72))
+                p.closeSubpath()
+            }
+
+        case .stupa:
+            // Buddhist stupa: hemispherical dome, square harmika, tapering spire.
+            rectShape(0.16, 1.0, 0.84, 0.88)              // plinth
+            rectShape(0.24, 0.88, 0.76, 0.80)
+            roundCircle(0.50, 0.66, 0.20)                 // dome
+            rectShape(0.42, 0.52, 0.58, 0.44)             // harmika
+            poly([(0.455, 0.44), (0.545, 0.44), (0.515, 0.14), (0.485, 0.14)])   // spire
+            for i in 0..<3 {                              // rings
+                let y = 0.40 - CGFloat(i) * 0.07
+                rectShape(0.44 + CGFloat(i) * 0.008, y, 0.56 - CGFloat(i) * 0.008, y - 0.018)
+            }
+            circle(0.50, 0.10, 0.022)                     // crowning jewel
+
+        case .pagoda:
+            // Tiered pagoda with upswept eaves.
+            rectShape(0.34, 1.0, 0.66, 0.92)
+            for i in 0..<4 {
+                let y = 0.92 - CGFloat(i) * 0.19          // storey floor
+                let half = 0.30 - CGFloat(i) * 0.055      // narrows as it rises
+                rectShape(0.50 - half * 0.62, y, 0.50 + half * 0.62, y - 0.115)   // storey
+                poly([(0.50 - half, y - 0.115),           // flared roof
+                      (0.50 + half, y - 0.115),
+                      (0.50 + half * 0.55, y - 0.175),
+                      (0.50 - half * 0.55, y - 0.175)])
+            }
+            poly([(0.487, 0.20), (0.513, 0.20), (0.50, 0.04)])   // finial
+
+        case .onionDomes:
+            // Orthodox church: three onion domes on drums.
+            rectShape(0.18, 1.0, 0.82, 0.66)
+            for (cx, r, dy) in [(CGFloat(0.28), CGFloat(0.075), CGFloat(0.50)),
+                                (CGFloat(0.50), CGFloat(0.105), CGFloat(0.38)),
+                                (CGFloat(0.72), CGFloat(0.075), CGFloat(0.50))] {
+                rectShape(cx - r * 0.7, 0.66, cx + r * 0.7, dy + r * 0.5)   // drum
+                roundCircle(cx, dy, r)                                       // dome
+                poly([(cx - 0.010, dy - r), (cx + 0.010, dy - r), (cx, dy - r - 0.10)])  // cross
+                rectShape(cx - 0.03, dy - r - 0.055, cx + 0.03, dy - r - 0.072)
+            }
+
+        case .gothicCathedral:
+            // Twin-spired cathedral with a rose window.
+            rectShape(0.24, 1.0, 0.76, 0.56)
+            for cx in [CGFloat(0.32), CGFloat(0.68)] {
+                rectShape(cx - 0.07, 1.0, cx + 0.07, 0.34)
+                poly([(cx - 0.078, 0.34), (cx + 0.078, 0.34), (cx, 0.06)])
+            }
+            circle(0.50, 0.70, 0.062)                     // rose window (hole)
+            p.move(to: pt(0.44, 1.0))                     // portal (hole)
+            p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.82))
+            p.closeSubpath()
+
+        case .alpinePeaks:
+            // Snow-capped range with a small town at the foot.
+            poly([(0.0, 1.0), (0.24, 0.22), (0.48, 1.0)])
+            poly([(0.34, 1.0), (0.62, 0.06), (0.90, 1.0)])
+            poly([(0.72, 1.0), (0.90, 0.40), (1.0, 1.0)])
+            poly([(0.545, 0.24), (0.62, 0.06), (0.695, 0.24),      // snow cap (hole)
+                  (0.655, 0.20), (0.615, 0.26), (0.585, 0.20)])
+            for i in 0..<5 {                                       // chalets
+                let x0 = 0.16 + CGFloat(i) * 0.15
+                rectShape(x0, 1.0, x0 + 0.075, 0.90)
+                poly([(x0 - 0.012, 0.90), (x0 + 0.087, 0.90), (x0 + 0.037, 0.84)])
+            }
+
+        case .colonialCathedral:
+            // Spanish colonial baroque: twin bell towers, central pediment.
+            rectShape(0.20, 1.0, 0.80, 0.58)
+            for cx in [CGFloat(0.28), CGFloat(0.72)] {
+                rectShape(cx - 0.085, 1.0, cx + 0.085, 0.40)       // tower
+                rectShape(cx - 0.10, 0.40, cx + 0.10, 0.35)        // cornice
+                roundCircle(cx, 0.29, 0.062)                       // cupola
+                poly([(cx - 0.008, 0.24), (cx + 0.008, 0.24), (cx, 0.14)])
+                p.move(to: pt(cx - 0.04, 0.68))                    // belfry opening (hole)
+                p.addQuadCurve(to: pt(cx + 0.04, 0.68), control: pt(cx, 0.50))
+                p.addLine(to: pt(cx + 0.04, 0.52))
+                p.addQuadCurve(to: pt(cx - 0.04, 0.52), control: pt(cx, 0.44))
+                p.closeSubpath()
+            }
+            poly([(0.36, 0.58), (0.64, 0.58), (0.50, 0.44)])       // pediment
+            p.move(to: pt(0.44, 1.0))                              // door (hole)
+            p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.78))
+            p.closeSubpath()
+
+        case .acaciaSavanna:
+            // Flat-topped acacia over the plain, with a low skyline behind.
+            for (x0, h) in [(CGFloat(0.60), CGFloat(0.66)), (CGFloat(0.72), CGFloat(0.58)),
+                            (CGFloat(0.84), CGFloat(0.70))] {
+                rectShape(x0, 0.94, x0 + 0.08, h)                  // distant buildings
+            }
+            rectShape(0.0, 0.94, 1.0, 1.0)                         // ground
+            rectShape(0.20, 0.94, 0.245, 0.52)                     // trunk
+            poly([(0.222, 0.62), (0.10, 0.50), (0.13, 0.46)])      // branches
+            poly([(0.222, 0.62), (0.35, 0.50), (0.32, 0.46)])
+            poly([(0.06, 0.46), (0.40, 0.46), (0.34, 0.36), (0.12, 0.36)])   // flat canopy
+            circle(0.80, 0.30, 0.075)                              // low sun
+
+        case .gabledHouses:
+            // Nordic / Dutch waterfront: stepped and pointed gables, mast behind.
+            rectShape(0.86, 0.94, 0.895, 0.16)                     // mast
+            poly([(0.895, 0.22), (0.895, 0.50), (0.99, 0.50)])     // sail
+            rectShape(0.0, 0.96, 1.0, 1.0)                         // quay
+            var x: CGFloat = 0.02
+            for i in 0..<6 {
+                let w: CGFloat = i % 2 == 0 ? 0.15 : 0.13
+                let top: CGFloat = 0.52 + CGFloat((i * 7) % 3) * 0.06
+                rectShape(x, 0.96, x + w, top)
+                if i % 2 == 0 {                                    // pointed gable
+                    poly([(x - 0.008, top), (x + w + 0.008, top), (x + w / 2, top - 0.12)])
+                } else {                                           // stepped gable
+                    rectShape(x + 0.02, top, x + w - 0.02, top - 0.04)
+                    rectShape(x + 0.045, top - 0.04, x + w - 0.045, top - 0.08)
+                }
+                for r in 0..<2 {                                   // windows (holes)
+                    for c in 0..<2 {
+                        let wx = x + 0.03 + CGFloat(c) * 0.06
+                        let wy = top + 0.10 + CGFloat(r) * 0.13
+                        rectShape(wx, wy, wx + 0.032, wy + 0.07)
+                    }
+                }
+                x += w + 0.015
+            }
+
         case .skyline:
             let heights: [CGFloat] = [0.55, 0.35, 0.62, 0.28, 0.48, 0.20, 0.58, 0.40, 0.66, 0.32, 0.50]
             let n = heights.count

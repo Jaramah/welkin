@@ -53,7 +53,7 @@ struct WelkinProvider: TimelineProvider {
             sky: c.code.sky,
             aqi: bundle.aqiNow,
             unitSymbol: unit.symbol,
-            dish: FlavorCatalog.flavor(for: bundle.place),
+            fact: FactCatalog.fact(for: bundle.place),
             isPlaceholder: false
         )
     }

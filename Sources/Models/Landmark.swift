@@ -16,6 +16,15 @@ enum LandmarkKind: Sendable, CaseIterable {
     // Wider world
     case taipei101, orientalPearl, gatewayOfIndia, watArun, namsanTower, bankOfChina
     case torii, monas, skyTower, belemTower, angkorWat
+    // True icons for cities that were stuck on the generic skyline
+    case stStephens, charlesBridge, duomoMilano, frauenkirche, puertaAlcala, hapennyBridge
+    case obelisco, elCapitolio, parliamentHungary, bayterek, minarEPakistan, machuPicchu
+    case libertyBell
+    /// Regional archetypes. A city we have no icon for still deserves a skyline from
+    /// the right continent — a generic glass-box city over Kathmandu or Nairobi reads
+    /// as a bug, not a fallback.
+    case mosque, stupa, pagoda, onionDomes, gothicCathedral, alpinePeaks
+    case colonialCathedral, acaciaSavanna, gabledHouses
     case skyline           // generic fallback
 
     /// Subtitle shown under the city name.
@@ -80,6 +89,28 @@ enum LandmarkKind: Sendable, CaseIterable {
         case .skyTower:          return "Sky Tower"
         case .belemTower:        return "Belém Tower"
         case .angkorWat:         return "Angkor Wat"
+        case .stStephens:        return "St. Stephen's Cathedral"
+        case .charlesBridge:     return "Charles Bridge"
+        case .duomoMilano:       return "Duomo di Milano"
+        case .frauenkirche:      return "Frauenkirche"
+        case .puertaAlcala:      return "Puerta de Alcalá"
+        case .hapennyBridge:     return "Ha'penny Bridge"
+        case .obelisco:          return "El Obelisco"
+        case .elCapitolio:       return "El Capitolio"
+        case .parliamentHungary: return "Hungarian Parliament"
+        case .bayterek:          return "Bayterek Tower"
+        case .minarEPakistan:    return "Minar-e-Pakistan"
+        case .machuPicchu:       return "Machu Picchu"
+        case .libertyBell:       return "Liberty Bell"
+        case .mosque:            return "Old Quarter Minarets"
+        case .stupa:             return "Golden Stupa"
+        case .pagoda:            return "Riverside Pagoda"
+        case .onionDomes:        return "Orthodox Domes"
+        case .gothicCathedral:   return "Old Town Cathedral"
+        case .alpinePeaks:       return "Mountain Skyline"
+        case .colonialCathedral: return "Colonial Cathedral"
+        case .acaciaSavanna:     return "Acacia Sunset"
+        case .gabledHouses:      return "Harbour Houses"
         case .skyline:           return "Skyline"
         }
     }
@@ -149,52 +180,84 @@ enum LandmarkCatalog {
         .init(city: "Boston", kinds: [.skyline], keywords: ["boston"], lat: 42.3601, lon: -71.0589),
         .init(city: "Miami", kinds: [.skyline], keywords: ["miami"], lat: 25.7617, lon: -80.1918),
         .init(city: "Houston", kinds: [.skyline], keywords: ["houston"], lat: 29.7604, lon: -95.3698),
-        .init(city: "Denver", kinds: [.skyline], keywords: ["denver"], lat: 39.7392, lon: -104.9903),
+        .init(city: "Denver", kinds: [.alpinePeaks, .skyline], keywords: ["denver"], lat: 39.7392, lon: -104.9903),
         .init(city: "Las Vegas", kinds: [.skyline], keywords: ["las vegas"], lat: 36.1699, lon: -115.1398),
         .init(city: "Vancouver", kinds: [.skyline], keywords: ["vancouver"], lat: 49.2827, lon: -123.1207),
         .init(city: "Hong Kong", kinds: [.bankOfChina, .skyline], keywords: ["hong kong", "kowloon"], lat: 22.3193, lon: 114.1694),
         .init(city: "Shanghai", kinds: [.orientalPearl, .skyline], keywords: ["shanghai"], lat: 31.2304, lon: 121.4737),
         .init(city: "Mumbai", kinds: [.gatewayOfIndia, .skyline], keywords: ["mumbai", "bombay"], lat: 19.0760, lon: 72.8777),
         .init(city: "Bangkok", kinds: [.watArun, .skyline], keywords: ["bangkok"], lat: 13.7563, lon: 100.5018),
-        .init(city: "Madrid", kinds: [.skyline], keywords: ["madrid"], lat: 40.4168, lon: -3.7038),
-        .init(city: "Amman", kinds: [.skyline], keywords: ["amman"], lat: 31.9539, lon: 35.9106),
-        .init(city: "Buenos Aires", kinds: [.skyline], keywords: ["buenos aires"], lat: -34.6037, lon: -58.3816),
+        .init(city: "Madrid", kinds: [.puertaAlcala, .skyline], keywords: ["madrid"], lat: 40.4168, lon: -3.7038),
+        .init(city: "Amman", kinds: [.mosque], keywords: ["amman"], lat: 31.9539, lon: 35.9106),
+        .init(city: "Buenos Aires", kinds: [.obelisco, .skyline], keywords: ["buenos aires"], lat: -34.6037, lon: -58.3816),
         .init(city: "São Paulo", kinds: [.skyline], keywords: ["são paulo", "sao paulo"], lat: -23.5505, lon: -46.6333),
         .init(city: "Melbourne", kinds: [.skyline], keywords: ["melbourne"], lat: -37.8136, lon: 144.9631),
         .init(city: "Seoul", kinds: [.namsanTower, .skyline], keywords: ["seoul"], lat: 37.5665, lon: 126.9780),
         .init(city: "Austin", kinds: [.skyline], keywords: ["austin"], lat: 30.2672, lon: -97.7431),
-        .init(city: "Philadelphia", kinds: [.skyline], keywords: ["philadelphia"], lat: 39.9526, lon: -75.1652),
+        .init(city: "Philadelphia", kinds: [.libertyBell, .skyline], keywords: ["philadelphia"], lat: 39.9526, lon: -75.1652),
         .init(city: "Atlanta", kinds: [.skyline], keywords: ["atlanta"], lat: 33.7490, lon: -84.3880),
         // Newly covered countries & cities
         .init(city: "Taipei", kinds: [.taipei101, .skyline], keywords: ["taipei"], lat: 25.0330, lon: 121.5654),
         .init(city: "Kyoto", kinds: [.torii], keywords: ["kyoto"], lat: 35.0116, lon: 135.7681),
         .init(city: "Osaka", kinds: [.torii, .skyline], keywords: ["osaka"], lat: 34.6937, lon: 135.5023),
         .init(city: "Jakarta", kinds: [.monas, .skyline], keywords: ["jakarta"], lat: -6.2088, lon: 106.8456),
-        .init(city: "Manila", kinds: [.skyline], keywords: ["manila", "quezon"], lat: 14.5995, lon: 120.9842),
-        .init(city: "Hanoi", kinds: [.skyline], keywords: ["hanoi", "ha noi"], lat: 21.0278, lon: 105.8342),
-        .init(city: "Ho Chi Minh City", kinds: [.skyline], keywords: ["ho chi minh", "saigon"], lat: 10.8231, lon: 106.6297),
+        .init(city: "Manila", kinds: [.colonialCathedral, .skyline], keywords: ["manila", "quezon"], lat: 14.5995, lon: 120.9842),
+        .init(city: "Hanoi", kinds: [.pagoda], keywords: ["hanoi", "ha noi"], lat: 21.0278, lon: 105.8342),
+        .init(city: "Ho Chi Minh City", kinds: [.pagoda, .skyline], keywords: ["ho chi minh", "saigon"], lat: 10.8231, lon: 106.6297),
         .init(city: "Siem Reap", kinds: [.angkorWat], keywords: ["siem reap", "phnom penh"], lat: 13.3671, lon: 103.8448),
         .init(city: "Auckland", kinds: [.skyTower], keywords: ["auckland"], lat: -36.8485, lon: 174.7633),
         .init(city: "Lisbon", kinds: [.belemTower], keywords: ["lisbon", "lisboa"], lat: 38.7223, lon: -9.1393),
-        .init(city: "Dublin", kinds: [.skyline], keywords: ["dublin"], lat: 53.3498, lon: -6.2603),
-        .init(city: "Prague", kinds: [.skyline], keywords: ["prague", "praha"], lat: 50.0755, lon: 14.4378),
-        .init(city: "Vienna", kinds: [.skyline], keywords: ["vienna", "wien"], lat: 48.2082, lon: 16.3738),
-        .init(city: "Copenhagen", kinds: [.skyline], keywords: ["copenhagen", "kobenhavn"], lat: 55.6761, lon: 12.5683),
-        .init(city: "Stockholm", kinds: [.skyline], keywords: ["stockholm"], lat: 59.3293, lon: 18.0686),
-        .init(city: "Zurich", kinds: [.skyline], keywords: ["zurich", "zürich"], lat: 47.3769, lon: 8.5417),
-        .init(city: "Milan", kinds: [.skyline], keywords: ["milan", "milano"], lat: 45.4642, lon: 9.1900),
-        .init(city: "Munich", kinds: [.skyline], keywords: ["munich", "münchen"], lat: 48.1351, lon: 11.5820),
+        .init(city: "Dublin", kinds: [.hapennyBridge], keywords: ["dublin"], lat: 53.3498, lon: -6.2603),
+        .init(city: "Prague", kinds: [.charlesBridge], keywords: ["prague", "praha"], lat: 50.0755, lon: 14.4378),
+        .init(city: "Vienna", kinds: [.stStephens], keywords: ["vienna", "wien"], lat: 48.2082, lon: 16.3738),
+        .init(city: "Copenhagen", kinds: [.gabledHouses], keywords: ["copenhagen", "kobenhavn"], lat: 55.6761, lon: 12.5683),
+        .init(city: "Stockholm", kinds: [.gabledHouses], keywords: ["stockholm"], lat: 59.3293, lon: 18.0686),
+        .init(city: "Zurich", kinds: [.alpinePeaks], keywords: ["zurich", "zürich"], lat: 47.3769, lon: 8.5417),
+        .init(city: "Milan", kinds: [.duomoMilano], keywords: ["milan", "milano"], lat: 45.4642, lon: 9.1900),
+        .init(city: "Munich", kinds: [.frauenkirche], keywords: ["munich", "münchen"], lat: 48.1351, lon: 11.5820),
         .init(city: "Doha", kinds: [.skyline], keywords: ["doha"], lat: 25.2854, lon: 51.5310),
         .init(city: "Tel Aviv", kinds: [.skyline], keywords: ["tel aviv"], lat: 32.0853, lon: 34.7818),
-        .init(city: "Nairobi", kinds: [.skyline], keywords: ["nairobi"], lat: -1.2921, lon: 36.8219),
-        .init(city: "Lagos", kinds: [.skyline], keywords: ["lagos"], lat: 6.5244, lon: 3.3792),
-        .init(city: "Marrakech", kinds: [.skyline], keywords: ["marrakech", "marrakesh", "casablanca"], lat: 31.6295, lon: -7.9811),
-        .init(city: "Montreal", kinds: [.skyline], keywords: ["montreal", "montréal"], lat: 45.5017, lon: -73.5673),
-        .init(city: "New Orleans", kinds: [.skyline], keywords: ["new orleans"], lat: 29.9511, lon: -90.0715),
+        .init(city: "Nairobi", kinds: [.acaciaSavanna], keywords: ["nairobi"], lat: -1.2921, lon: 36.8219),
+        .init(city: "Lagos", kinds: [.acaciaSavanna], keywords: ["lagos"], lat: 6.5244, lon: 3.3792),
+        .init(city: "Marrakech", kinds: [.mosque], keywords: ["marrakech", "marrakesh", "casablanca"], lat: 31.6295, lon: -7.9811),
+        .init(city: "Montreal", kinds: [.gothicCathedral, .skyline], keywords: ["montreal", "montréal"], lat: 45.5017, lon: -73.5673),
+        .init(city: "New Orleans", kinds: [.colonialCathedral], keywords: ["new orleans"], lat: 29.9511, lon: -90.0715),
         .init(city: "Honolulu", kinds: [.palmTrees], keywords: ["honolulu"], lat: 21.3069, lon: -157.8583),
-        .init(city: "Lima", kinds: [.skyline], keywords: ["lima"], lat: -12.0464, lon: -77.0428),
-        .init(city: "Santiago", kinds: [.skyline], keywords: ["santiago"], lat: -33.4489, lon: -70.6693),
-        .init(city: "Havana", kinds: [.skyline], keywords: ["havana", "habana"], lat: 23.1136, lon: -82.3666),
+        .init(city: "Lima", kinds: [.colonialCathedral], keywords: ["lima"], lat: -12.0464, lon: -77.0428),
+        .init(city: "Santiago", kinds: [.alpinePeaks, .skyline], keywords: ["santiago"], lat: -33.4489, lon: -70.6693),
+        .init(city: "Havana", kinds: [.elCapitolio], keywords: ["havana", "habana"], lat: 23.1136, lon: -82.3666),
+        // Countries the app didn't reach before
+        .init(city: "Budapest", kinds: [.parliamentHungary], keywords: ["budapest"], lat: 47.4979, lon: 19.0402),
+        .init(city: "Warsaw", kinds: [.gothicCathedral], keywords: ["warsaw", "warszawa"], lat: 52.2297, lon: 21.0122),
+        .init(city: "Kraków", kinds: [.gothicCathedral], keywords: ["krakow", "kraków"], lat: 50.0647, lon: 19.9450),
+        .init(city: "Kyiv", kinds: [.onionDomes], keywords: ["kyiv", "kiev"], lat: 50.4501, lon: 30.5234),
+        .init(city: "Oslo", kinds: [.gabledHouses], keywords: ["oslo"], lat: 59.9139, lon: 10.7522),
+        .init(city: "Helsinki", kinds: [.gothicCathedral], keywords: ["helsinki"], lat: 60.1699, lon: 24.9384),
+        .init(city: "Reykjavík", kinds: [.alpinePeaks], keywords: ["reykjavik", "reykjavík"], lat: 64.1466, lon: -21.9426),
+        .init(city: "Edinburgh", kinds: [.gothicCathedral], keywords: ["edinburgh", "glasgow"], lat: 55.9533, lon: -3.1883),
+        .init(city: "Bucharest", kinds: [.gothicCathedral], keywords: ["bucharest", "bucurești"], lat: 44.4268, lon: 26.1025),
+        .init(city: "Sofia", kinds: [.onionDomes], keywords: ["sofia"], lat: 42.6977, lon: 23.3219),
+        .init(city: "Belgrade", kinds: [.onionDomes], keywords: ["belgrade", "beograd"], lat: 44.7866, lon: 20.4489),
+        .init(city: "Astana", kinds: [.bayterek], keywords: ["astana", "nur-sultan", "almaty"], lat: 51.1694, lon: 71.4491),
+        .init(city: "Lahore", kinds: [.minarEPakistan], keywords: ["lahore", "islamabad"], lat: 31.5204, lon: 74.3587),
+        .init(city: "Karachi", kinds: [.mosque], keywords: ["karachi"], lat: 24.8607, lon: 67.0011),
+        .init(city: "Dhaka", kinds: [.mosque], keywords: ["dhaka"], lat: 23.8103, lon: 90.4125),
+        .init(city: "Riyadh", kinds: [.mosque], keywords: ["riyadh", "jeddah"], lat: 24.7136, lon: 46.6753),
+        .init(city: "Kuwait City", kinds: [.mosque], keywords: ["kuwait"], lat: 29.3759, lon: 47.9774),
+        .init(city: "Tehran", kinds: [.mosque], keywords: ["tehran"], lat: 35.6892, lon: 51.3890),
+        .init(city: "Baghdad", kinds: [.mosque], keywords: ["baghdad"], lat: 33.3152, lon: 44.3661),
+        .init(city: "Kathmandu", kinds: [.stupa], keywords: ["kathmandu"], lat: 27.7172, lon: 85.3240),
+        .init(city: "Yangon", kinds: [.stupa], keywords: ["yangon", "rangoon"], lat: 16.8661, lon: 96.1951),
+        .init(city: "Colombo", kinds: [.stupa], keywords: ["colombo"], lat: 6.9271, lon: 79.8612),
+        .init(city: "Vientiane", kinds: [.stupa], keywords: ["vientiane", "luang prabang"], lat: 17.9757, lon: 102.6331),
+        .init(city: "Cusco", kinds: [.machuPicchu], keywords: ["cusco", "cuzco"], lat: -13.5319, lon: -71.9675),
+        .init(city: "Bogotá", kinds: [.colonialCathedral], keywords: ["bogota", "bogotá", "medellin"], lat: 4.7110, lon: -74.0721),
+        .init(city: "Quito", kinds: [.colonialCathedral], keywords: ["quito", "guayaquil"], lat: -0.1807, lon: -78.4678),
+        .init(city: "Montevideo", kinds: [.colonialCathedral], keywords: ["montevideo"], lat: -34.9011, lon: -56.1645),
+        .init(city: "Accra", kinds: [.acaciaSavanna], keywords: ["accra"], lat: 5.6037, lon: -0.1870),
+        .init(city: "Addis Ababa", kinds: [.acaciaSavanna], keywords: ["addis"], lat: 9.0320, lon: 38.7469),
+        .init(city: "Dar es Salaam", kinds: [.acaciaSavanna], keywords: ["dar es salaam"], lat: -6.7924, lon: 39.2083),
+        .init(city: "Johannesburg", kinds: [.acaciaSavanna], keywords: ["johannesburg", "pretoria"], lat: -26.2041, lon: 28.0473),
     ]
 
     static func landmark(for place: Place, on date: Date = Date()) -> Landmark {

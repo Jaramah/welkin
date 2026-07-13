@@ -59,8 +59,8 @@ struct CurrentWeatherView: View {
                 .tracking(1)
                 .foregroundStyle(Color.welkinTertiary)
 
-            // Local delicacy to try — inline, no card.
-            LocalFlavorView(place: place)
+            // A fact about this place — inline, no card. Tap for another.
+            CityFactView(place: place)
                 .padding(.top, 14)
         }
         .frame(maxWidth: .infinity)
