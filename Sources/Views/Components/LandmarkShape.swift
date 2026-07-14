@@ -437,18 +437,51 @@ struct LandmarkShape: Shape {
             poly([(0.84, 0.84), (0.89, 0.56), (0.94, 0.84)])
 
         case .merlion:
-            rectShape(0.20, 1.00, 0.80, 0.90)          // plinth
-            // Lion head, mane, body and curling tail as one closed silhouette.
-            poly([
-                (0.32, 0.90), (0.32, 0.62), (0.27, 0.57),   // chest up to the jaw
-                (0.35, 0.50), (0.36, 0.41),                 // snout, then up the mane
-                (0.44, 0.32), (0.54, 0.31), (0.61, 0.39),   // mane over the head
-                (0.59, 0.51), (0.67, 0.59),                 // neck down to the shoulder
-                (0.77, 0.63), (0.87, 0.55), (0.93, 0.41),   // back, tail sweeping up
-                (0.87, 0.38), (0.84, 0.53),                 // tail tip and inner edge
-                (0.74, 0.71), (0.68, 0.90),                 // back down to the plinth
-            ])
-            rectShape(0.05, 0.60, 0.29, 0.555)         // the water jet from its mouth
+            // A lion's head in profile — blunt muzzle, mane swept back — on a fish
+            // body with a curling tail. Drawn as ONE closed outline: under eoFill any
+            // overlap between separate shapes punches a hole.
+            //
+            // No water jet. A stream leaving the mouth sits right where a beak would
+            // be, and the eye fuses the two: every version with a spout read as a
+            // rooster, however the rest of the body was drawn.
+            p.move(to: pt(0.375, 0.94))
+            p.addQuadCurve(to: pt(0.350, 0.566), control: pt(0.334, 0.764))  // chest
+            p.addLine(to: pt(0.338, 0.516))
+            p.addLine(to: pt(0.330, 0.500))     // jaw
+            p.addLine(to: pt(0.276, 0.494))     // chin
+            p.addLine(to: pt(0.254, 0.456))     // blunt, squared muzzle
+            p.addLine(to: pt(0.250, 0.430))
+            p.addLine(to: pt(0.302, 0.404))     // open mouth
+            p.addLine(to: pt(0.248, 0.378))
+            p.addLine(to: pt(0.254, 0.348))
+            p.addLine(to: pt(0.288, 0.318))
+            p.addLine(to: pt(0.322, 0.292))     // brow
+            p.addLine(to: pt(0.364, 0.258))     // crown
+            // Mane: locks sweeping backward, the way a lion's mane lies. Radiating
+            // spikes read as a cockscomb.
+            let mane: [((CGFloat, CGFloat), (CGFloat, CGFloat))] = [
+                ((0.402, 0.148), (0.434, 0.230)),
+                ((0.484, 0.116), (0.504, 0.234)),
+                ((0.564, 0.146), (0.562, 0.264)),
+                ((0.628, 0.212), (0.608, 0.310)),
+                ((0.664, 0.298), (0.622, 0.372)),
+            ]
+            for (tip, valley) in mane {
+                p.addLine(to: pt(tip.0, tip.1))
+                p.addLine(to: pt(valley.0, valley.1))
+            }
+            p.addLine(to: pt(0.666, 0.400))     // nape
+            p.addLine(to: pt(0.602, 0.470))     // shoulder
+            p.addQuadCurve(to: pt(0.648, 0.734), control: pt(0.636, 0.598))  // fish body
+            p.addQuadCurve(to: pt(0.788, 0.700), control: pt(0.726, 0.784))  // tail, curling low
+            p.addLine(to: pt(0.900, 0.590))     // fluke, upper blade
+            p.addLine(to: pt(0.858, 0.700))
+            p.addLine(to: pt(0.946, 0.760))     // fluke, lower blade
+            p.addLine(to: pt(0.826, 0.798))
+            p.addQuadCurve(to: pt(0.562, 0.902), control: pt(0.690, 0.884))  // underside
+            p.addLine(to: pt(0.514, 0.94))
+            p.closeSubpath()
+            rectShape(0.30, 1.00, 0.70, 0.94)   // plinth (abuts, never overlaps)
 
         case .singaporeFlyer:
             let fx: CGFloat = 0.50, fy: CGFloat = 0.40, fr: CGFloat = 0.32
