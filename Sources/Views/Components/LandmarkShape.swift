@@ -600,27 +600,28 @@ struct LandmarkShape: Shape {
         case .duomoMilano:
             // Milan: a forest of gothic pinnacles over a wide facade.
             rectShape(0.14, 1.0, 0.86, 0.58)
-            for i in 0..<9 {                              // pinnacles, tallest at centre
+            for i in 0..<9 {
                 let x = 0.18 + CGFloat(i) * 0.08
                 let d = abs(CGFloat(i) - 4) / 4
                 let top = 0.14 + d * 0.30
-                rectShape(x - 0.014, 0.58, x + 0.014, top + 0.06)
-                poly([(x - 0.022, top + 0.06), (x + 0.022, top + 0.06), (x, top)])
+                rectShape(x - 0.013, 0.58, x + 0.013, top + 0.07)
+                // Spire base == shaft width. Wider, and it reads as an arrow.
+                needle(&p, pt: pt, cx: x, baseY: top + 0.07, halfW: 0.013, tipY: top)
             }
-            for i in 0..<3 {                              // doorways (holes)
+            for i in 0..<3 {                               // doorways (holes)
                 let cx = 0.34 + CGFloat(i) * 0.16
                 p.move(to: pt(cx - 0.035, 1.0))
-                p.addQuadCurve(to: pt(cx + 0.035, 1.0), control: pt(cx, 0.74))
+                p.addQuadCurve(to: pt(cx + 0.035, 1.0), control: pt(cx, 0.76))
                 p.closeSubpath()
             }
 
         case .frauenkirche:
             // Munich: twin brick towers under copper onion domes.
-            rectShape(0.30, 1.0, 0.70, 0.70)              // nave
-            for cx in [CGFloat(0.36), CGFloat(0.64)] {
-                rectShape(cx - 0.075, 1.0, cx + 0.075, 0.34)   // tower
-                roundCircle(cx, 0.28, 0.075)                   // onion dome
-                poly([(cx - 0.012, 0.24), (cx + 0.012, 0.24), (cx, 0.10)])  // finial
+            rectShape(0.435, 1.0, 0.565, 0.70)             // nave BETWEEN the towers
+            for cx in [CGFloat(0.360), CGFloat(0.640)] {
+                rectShape(cx - 0.075, 1.0, cx + 0.075, 0.34)
+                onionCap(&p, pt: pt, cx: cx, baseY: 0.34, halfW: 0.075, apexY: 0.20)
+                needle(&p, pt: pt, cx: cx, baseY: 0.20, halfW: 0.013, tipY: 0.10)
             }
 
         case .puertaAlcala:
@@ -639,17 +640,18 @@ struct LandmarkShape: Shape {
 
         case .hapennyBridge:
             // Dublin: a single cast-iron arch with lamp posts.
-            p.move(to: pt(0.08, 0.86))                    // arch band
-            p.addQuadCurve(to: pt(0.92, 0.86), control: pt(0.50, 0.30))
-            p.addLine(to: pt(0.92, 0.94))
-            p.addQuadCurve(to: pt(0.08, 0.94), control: pt(0.50, 0.40))
+            // The band runs to the baseline; separate abutments overlapped it and
+            // punched holes at both ends.
+            p.move(to: pt(0.05, 1.0))
+            p.addQuadCurve(to: pt(0.95, 1.0), control: pt(0.50, 0.34))
+            p.addQuadCurve(to: pt(0.05, 1.0), control: pt(0.50, 0.52))
             p.closeSubpath()
-            rectShape(0.04, 1.0, 0.12, 0.84)              // abutments
-            rectShape(0.88, 1.0, 0.96, 0.84)
-            for cx in [CGFloat(0.20), CGFloat(0.50), CGFloat(0.80)] {   // lamps
-                let y: CGFloat = cx == 0.50 ? 0.42 : 0.60
-                rectShape(cx - 0.007, y, cx + 0.007, y - 0.12)
-                circle(cx, y - 0.15, 0.022)
+            for t in [CGFloat(0.22), CGFloat(0.5), CGFloat(0.78)] {
+                let mt = 1 - t
+                let x = mt * mt * 0.05 + 2 * mt * t * 0.50 + t * t * 0.95
+                let y = mt * mt * 1.0 + 2 * mt * t * 0.34 + t * t * 1.0
+                rectShape(x - 0.007, y, x + 0.007, y - 0.11)   // lamp standing ON the arch
+                roundCircle(x, y - 0.13, 0.022)
             }
 
         case .obelisco:
@@ -661,58 +663,61 @@ struct LandmarkShape: Shape {
 
         case .elCapitolio:
             // Havana: dome and colonnade.
-            rectShape(0.10, 1.0, 0.90, 0.72)              // podium
-            for i in 0..<8 {                              // columns
+            rectShape(0.10, 1.0, 0.90, 0.72)               // podium
+            for i in 0..<8 {
                 let x0 = 0.16 + CGFloat(i) * 0.09
-                rectShape(x0, 0.72, x0 + 0.035, 0.52)
+                rectShape(x0, 0.72, x0 + 0.035, 0.52)      // colonnade
             }
-            rectShape(0.10, 0.52, 0.90, 0.46)             // entablature
-            poly([(0.30, 0.46), (0.70, 0.46), (0.50, 0.36)])    // pediment
-            roundCircle(0.50, 0.30, 0.13)                 // dome
-            rectShape(0.37, 0.36, 0.63, 0.30)             // drum
-            poly([(0.485, 0.17), (0.515, 0.17), (0.50, 0.06)])  // lantern
+            rectShape(0.10, 0.52, 0.90, 0.46)              // entablature
+            rectShape(0.38, 0.46, 0.62, 0.32)              // drum
+            domeCap(&p, pt: pt, cx: 0.50, baseY: 0.32, halfW: 0.13, apexY: 0.14)
+            needle(&p, pt: pt, cx: 0.50, baseY: 0.14, halfW: 0.014, tipY: 0.05)
 
         case .parliamentHungary:
             // Budapest: central dome flanked by a long spiky Gothic Revival wing.
             rectShape(0.02, 1.0, 0.98, 0.74)
-            for i in 0..<10 {                             // spires along the roof
+            for i in 0..<10 {
                 let x = 0.07 + CGFloat(i) * 0.093
-                if abs(x - 0.50) < 0.10 { continue }      // leave room for the dome
+                if abs(x - 0.50) < 0.12 { continue }       // leave room for the dome
                 rectShape(x - 0.012, 0.74, x + 0.012, 0.58)
-                poly([(x - 0.02, 0.58), (x + 0.02, 0.58), (x, 0.46)])
+                needle(&p, pt: pt, cx: x, baseY: 0.58, halfW: 0.012, tipY: 0.46)
             }
-            rectShape(0.40, 0.74, 0.60, 0.44)             // drum
-            roundCircle(0.50, 0.36, 0.10)                 // dome
-            poly([(0.487, 0.28), (0.513, 0.28), (0.50, 0.14)])  // spire
+            rectShape(0.42, 0.74, 0.58, 0.50)              // drum
+            domeCap(&p, pt: pt, cx: 0.50, baseY: 0.50, halfW: 0.10, apexY: 0.32)
+            needle(&p, pt: pt, cx: 0.50, baseY: 0.32, halfW: 0.012, tipY: 0.20)
 
         case .bayterek:
             // Astana: a golden sphere cradled in a splayed white lattice.
-            poly([(0.34, 1.0), (0.40, 1.0), (0.485, 0.36), (0.455, 0.36)])   // left leg
-            poly([(0.66, 1.0), (0.60, 1.0), (0.515, 0.36), (0.545, 0.36)])   // right leg
-            rectShape(0.478, 1.0, 0.522, 0.36)            // core
-            roundCircle(0.50, 0.28, 0.115)                // sphere
-            poly([(0.492, 0.17), (0.508, 0.17), (0.50, 0.06)])   // mast
+            poly([(0.34, 1.0), (0.40, 1.0), (0.487, 0.40), (0.455, 0.40)])   // left leg
+            poly([(0.66, 1.0), (0.60, 1.0), (0.513, 0.40), (0.545, 0.40)])   // right leg
+            rectShape(0.478, 1.0, 0.522, 0.40)             // core stops at the sphere
+            roundCircle(0.50, 0.285, 0.115)                // sphere
+            needle(&p, pt: pt, cx: 0.50, baseY: 0.17, halfW: 0.010, tipY: 0.06)
 
         case .minarEPakistan:
             // Lahore: a tapering minaret on a tiered platform.
-            rectShape(0.22, 1.0, 0.78, 0.94)              // platform
+            rectShape(0.22, 1.0, 0.78, 0.94)               // platform
             rectShape(0.30, 0.94, 0.70, 0.88)
-            poly([(0.435, 0.88), (0.565, 0.88), (0.535, 0.20), (0.465, 0.20)])  // shaft
-            rectShape(0.44, 0.24, 0.56, 0.20)             // balcony
-            poly([(0.465, 0.20), (0.535, 0.20), (0.50, 0.04)])  // crown
-            circle(0.50, 0.02, 0.016)
+            poly([(0.435, 0.88), (0.565, 0.88), (0.535, 0.22), (0.465, 0.22)])   // shaft
+            rectShape(0.442, 0.26, 0.466, 0.22)            // balcony tabs, abutting
+            rectShape(0.534, 0.26, 0.558, 0.22)
+            needle(&p, pt: pt, cx: 0.50, baseY: 0.22, halfW: 0.035, tipY: 0.05)
 
         case .machuPicchu:
-            // Cusco: terraced ridge under Huayna Picchu's peak.
-            poly([(0.60, 1.0), (0.80, 0.14), (1.0, 1.0)])       // the peak behind
-            poly([(0.0, 1.0), (0.18, 0.50), (0.40, 1.0)])       // smaller peak
-            for i in 0..<5 {                                    // terraces
-                let y = 0.62 + CGFloat(i) * 0.075
-                rectShape(0.16 + CGFloat(i) * 0.03, y, 0.68 - CGFloat(i) * 0.02, y + 0.045)
+            // Cusco: terraces cut into the silhouette as steps. Laid over the ridge as
+            // separate rectangles they became white stripes — eoFill turns overlap
+            // into a hole.
+            poly([
+                (0.04, 1.00), (0.04, 0.88), (0.15, 0.88), (0.15, 0.80),
+                (0.26, 0.80), (0.26, 0.72), (0.37, 0.72), (0.37, 0.64),
+                (0.46, 0.64),
+                (0.52, 0.50), (0.58, 0.58),
+                (0.70, 0.12),                              // Huayna Picchu
+                (0.82, 0.54), (0.90, 0.46), (0.98, 1.00),
+            ])
+            for x in [CGFloat(0.30), CGFloat(0.40)] {      // ruin blocks (holes)
+                rectShape(x, 0.70, x + 0.045, 0.665)
             }
-            rectShape(0.30, 0.62, 0.36, 0.55)                   // ruined walls
-            rectShape(0.44, 0.62, 0.50, 0.57)
-            rectShape(0.56, 0.62, 0.61, 0.56)
 
         case .libertyBell:
             // Philadelphia: the bell, crack and all.
@@ -727,32 +732,31 @@ struct LandmarkShape: Shape {
         case .mosque:
             // Central dome, two minarets, arched arcade.
             rectShape(0.20, 1.0, 0.80, 0.62)
-            roundCircle(0.50, 0.50, 0.155)                // main dome
-            poly([(0.487, 0.36), (0.513, 0.36), (0.50, 0.24)])  // finial
-            for cx in [CGFloat(0.10), CGFloat(0.90)] {    // minarets
+            domeCap(&p, pt: pt, cx: 0.50, baseY: 0.62, halfW: 0.17, apexY: 0.36)
+            needle(&p, pt: pt, cx: 0.50, baseY: 0.36, halfW: 0.013, tipY: 0.25)
+            for cx in [CGFloat(0.10), CGFloat(0.90)] {
                 rectShape(cx - 0.028, 1.0, cx + 0.028, 0.26)
-                rectShape(cx - 0.042, 0.34, cx + 0.042, 0.30)   // balcony
-                poly([(cx - 0.028, 0.26), (cx + 0.028, 0.26), (cx, 0.12)])
+                needle(&p, pt: pt, cx: cx, baseY: 0.26, halfW: 0.028, tipY: 0.12)
+                // Balcony as two side tabs. A single wider bar would overlap the
+                // shaft and cut a hole straight through the minaret.
+                rectShape(cx - 0.044, 0.34, cx - 0.028, 0.30)
+                rectShape(cx + 0.028, 0.34, cx + 0.044, 0.30)
             }
-            for i in 0..<3 {                              // arcade (holes)
+            for i in 0..<3 {                               // arcade (holes)
                 let cx = 0.34 + CGFloat(i) * 0.16
                 p.move(to: pt(cx - 0.05, 1.0))
-                p.addQuadCurve(to: pt(cx + 0.05, 1.0), control: pt(cx, 0.72))
+                p.addQuadCurve(to: pt(cx + 0.05, 1.0), control: pt(cx, 0.74))
                 p.closeSubpath()
             }
 
         case .stupa:
             // Buddhist stupa: hemispherical dome, square harmika, tapering spire.
-            rectShape(0.16, 1.0, 0.84, 0.88)              // plinth
+            rectShape(0.16, 1.0, 0.84, 0.88)               // plinth
             rectShape(0.24, 0.88, 0.76, 0.80)
-            roundCircle(0.50, 0.66, 0.20)                 // dome
-            rectShape(0.42, 0.52, 0.58, 0.44)             // harmika
-            poly([(0.455, 0.44), (0.545, 0.44), (0.515, 0.14), (0.485, 0.14)])   // spire
-            for i in 0..<3 {                              // rings
-                let y = 0.40 - CGFloat(i) * 0.07
-                rectShape(0.44 + CGFloat(i) * 0.008, y, 0.56 - CGFloat(i) * 0.008, y - 0.018)
-            }
-            circle(0.50, 0.10, 0.022)                     // crowning jewel
+            domeCap(&p, pt: pt, cx: 0.50, baseY: 0.80, halfW: 0.21, apexY: 0.52)
+            rectShape(0.42, 0.52, 0.58, 0.44)              // harmika
+            poly([(0.455, 0.44), (0.545, 0.44), (0.515, 0.16), (0.485, 0.16)])   // spire
+            roundCircle(0.50, 0.12, 0.028)                 // crowning jewel
 
         case .pagoda:
             // Tiered pagoda with upswept eaves.
@@ -771,71 +775,64 @@ struct LandmarkShape: Shape {
         case .onionDomes:
             // Orthodox church: three onion domes on drums.
             rectShape(0.18, 1.0, 0.82, 0.66)
-            for (cx, r, dy) in [(CGFloat(0.28), CGFloat(0.075), CGFloat(0.50)),
-                                (CGFloat(0.50), CGFloat(0.105), CGFloat(0.38)),
-                                (CGFloat(0.72), CGFloat(0.075), CGFloat(0.50))] {
-                rectShape(cx - r * 0.7, 0.66, cx + r * 0.7, dy + r * 0.5)   // drum
-                roundCircle(cx, dy, r)                                       // dome
-                poly([(cx - 0.010, dy - r), (cx + 0.010, dy - r), (cx, dy - r - 0.10)])  // cross
-                rectShape(cx - 0.03, dy - r - 0.055, cx + 0.03, dy - r - 0.072)
+            for (cx, halfW, apexY) in [(CGFloat(0.28), CGFloat(0.055), CGFloat(0.44)),
+                                       (CGFloat(0.50), CGFloat(0.075), CGFloat(0.32)),
+                                       (CGFloat(0.72), CGFloat(0.055), CGFloat(0.44))] {
+                rectShape(cx - halfW * 0.85, 0.66, cx + halfW * 0.85, apexY + 0.10)   // drum
+                onionCap(&p, pt: pt, cx: cx, baseY: apexY + 0.10, halfW: halfW, apexY: apexY)
+                rectShape(cx - 0.006, apexY, cx + 0.006, apexY - 0.075)              // cross
+                rectShape(cx - 0.028, apexY - 0.040, cx - 0.006, apexY - 0.055)
+                rectShape(cx + 0.006, apexY - 0.040, cx + 0.028, apexY - 0.055)
             }
 
         case .gothicCathedral:
             // Twin-spired cathedral with a rose window.
-            rectShape(0.24, 1.0, 0.76, 0.56)
-            for cx in [CGFloat(0.32), CGFloat(0.68)] {
+            rectShape(0.38, 1.0, 0.62, 0.56)               // nave between the towers
+            poly([(0.38, 0.56), (0.62, 0.56), (0.50, 0.44)])
+            for cx in [CGFloat(0.31), CGFloat(0.69)] {
                 rectShape(cx - 0.07, 1.0, cx + 0.07, 0.34)
-                poly([(cx - 0.078, 0.34), (cx + 0.078, 0.34), (cx, 0.06)])
+                needle(&p, pt: pt, cx: cx, baseY: 0.34, halfW: 0.07, tipY: 0.06)
             }
-            circle(0.50, 0.70, 0.062)                     // rose window (hole)
-            p.move(to: pt(0.44, 1.0))                     // portal (hole)
-            p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.82))
+            roundCircle(0.50, 0.70, 0.048)                 // rose window (hole)
+            p.move(to: pt(0.44, 1.0))                      // portal (hole)
+            p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.80))
             p.closeSubpath()
 
         case .alpinePeaks:
-            // Snow-capped range with a small town at the foot.
-            poly([(0.0, 1.0), (0.24, 0.22), (0.48, 1.0)])
-            poly([(0.34, 1.0), (0.62, 0.06), (0.90, 1.0)])
-            poly([(0.72, 1.0), (0.90, 0.40), (1.0, 1.0)])
-            poly([(0.545, 0.24), (0.62, 0.06), (0.695, 0.24),      // snow cap (hole)
-                  (0.655, 0.20), (0.615, 0.26), (0.585, 0.20)])
-            for i in 0..<5 {                                       // chalets
-                let x0 = 0.16 + CGFloat(i) * 0.15
-                rectShape(x0, 1.0, x0 + 0.075, 0.90)
-                poly([(x0 - 0.012, 0.90), (x0 + 0.087, 0.90), (x0 + 0.037, 0.84)])
-            }
+            // Snow-capped range. The chalets are gone: they sat over the slopes and
+            // punched holes straight through the mountains.
+            poly([(0.00, 1.0), (0.22, 0.30), (0.44, 1.0)])
+            poly([(0.32, 1.0), (0.60, 0.10), (0.88, 1.0)])
+            poly([(0.74, 1.0), (0.94, 0.44), (1.00, 1.0)])
+            poly([(0.525, 0.28), (0.60, 0.10), (0.675, 0.28),      // snow cap (hole)
+                  (0.635, 0.24), (0.598, 0.30), (0.562, 0.24)])
 
         case .colonialCathedral:
             // Spanish colonial baroque: twin bell towers, central pediment.
-            rectShape(0.20, 1.0, 0.80, 0.58)
-            for cx in [CGFloat(0.28), CGFloat(0.72)] {
-                rectShape(cx - 0.085, 1.0, cx + 0.085, 0.40)       // tower
-                rectShape(cx - 0.10, 0.40, cx + 0.10, 0.35)        // cornice
-                roundCircle(cx, 0.29, 0.062)                       // cupola
-                poly([(cx - 0.008, 0.24), (cx + 0.008, 0.24), (cx, 0.14)])
-                p.move(to: pt(cx - 0.04, 0.68))                    // belfry opening (hole)
-                p.addQuadCurve(to: pt(cx + 0.04, 0.68), control: pt(cx, 0.50))
-                p.addLine(to: pt(cx + 0.04, 0.52))
-                p.addQuadCurve(to: pt(cx - 0.04, 0.52), control: pt(cx, 0.44))
+            rectShape(0.34, 1.0, 0.66, 0.58)               // nave between the towers
+            poly([(0.34, 0.58), (0.66, 0.58), (0.50, 0.44)])
+            for cx in [CGFloat(0.255), CGFloat(0.745)] {
+                rectShape(cx - 0.085, 1.0, cx + 0.085, 0.42)
+                domeCap(&p, pt: pt, cx: cx, baseY: 0.42, halfW: 0.062, apexY: 0.29)
+                needle(&p, pt: pt, cx: cx, baseY: 0.29, halfW: 0.010, tipY: 0.20)
+                p.move(to: pt(cx - 0.042, 0.78))           // belfry opening (hole)
+                p.addQuadCurve(to: pt(cx + 0.042, 0.78), control: pt(cx, 0.56))
                 p.closeSubpath()
             }
-            poly([(0.36, 0.58), (0.64, 0.58), (0.50, 0.44)])       // pediment
-            p.move(to: pt(0.44, 1.0))                              // door (hole)
+            p.move(to: pt(0.44, 1.0))                      // door (hole)
             p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.78))
             p.closeSubpath()
 
         case .acaciaSavanna:
             // Flat-topped acacia over the plain, with a low skyline behind.
+            roundCircle(0.80, 0.28, 0.085)                 // low sun — `circle` gave an oval
             for (x0, h) in [(CGFloat(0.60), CGFloat(0.66)), (CGFloat(0.72), CGFloat(0.58)),
                             (CGFloat(0.84), CGFloat(0.70))] {
-                rectShape(x0, 0.94, x0 + 0.08, h)                  // distant buildings
+                rectShape(x0, 0.94, x0 + 0.08, h)          // distant buildings
             }
-            rectShape(0.0, 0.94, 1.0, 1.0)                         // ground
-            rectShape(0.20, 0.94, 0.245, 0.52)                     // trunk
-            poly([(0.222, 0.62), (0.10, 0.50), (0.13, 0.46)])      // branches
-            poly([(0.222, 0.62), (0.35, 0.50), (0.32, 0.46)])
-            poly([(0.06, 0.46), (0.40, 0.46), (0.34, 0.36), (0.12, 0.36)])   // flat canopy
-            circle(0.80, 0.30, 0.075)                              // low sun
+            rectShape(0.0, 0.94, 1.0, 1.0)                 // ground
+            rectShape(0.205, 0.94, 0.245, 0.44)            // trunk
+            poly([(0.05, 0.44), (0.40, 0.44), (0.34, 0.33), (0.11, 0.33)])   // canopy
 
         case .gabledHouses:
             // Nordic / Dutch waterfront: stepped and pointed gables, mast behind.
@@ -864,22 +861,21 @@ struct LandmarkShape: Shape {
             }
 
         case .hinduTemple:
-            // A gopuram: tiered tower over a temple wall, with roof finials.
-            rectShape(0.06, 1.0, 0.94, 0.84)                 // compound wall
-            roundCircle(0.16, 0.80, 0.055)                   // corner shrines
-            roundCircle(0.84, 0.80, 0.055)
+            // A gopuram: tiered temple tower over a walled compound.
+            rectShape(0.06, 1.0, 0.94, 0.84)               // compound wall
+            roundCircle(0.16, 0.785, 0.055)                // corner shrines, abutting the wall
+            roundCircle(0.84, 0.785, 0.055)
             poly([(0.28, 0.84), (0.72, 0.84), (0.625, 0.20), (0.375, 0.20)])   // tower
-            for i in 0..<5 {                                 // tier bands (holes)
-                let t = CGFloat(i) / 5
-                let y = 0.30 + CGFloat(i) * 0.105
-                let half = 0.11 + t * 0.10                   // widens toward the base
-                rectShape(0.50 - half, y, 0.50 + half, y + 0.016)
+            for i in 0..<5 {                               // tier bands (holes)
+                let y = 0.32 + CGFloat(i) * 0.10
+                let half = 0.10 + (CGFloat(i) / 5) * 0.085
+                rectShape(0.50 - half, y, 0.50 + half, y + 0.012)
             }
-            rectShape(0.355, 0.20, 0.645, 0.13)              // barrel roof
-            for cx in [CGFloat(0.41), CGFloat(0.50), CGFloat(0.59)] {          // finials
-                poly([(cx - 0.019, 0.13), (cx + 0.019, 0.13), (cx, 0.04)])
+            rectShape(0.355, 0.20, 0.645, 0.13)            // barrel roof
+            for cx in [CGFloat(0.41), CGFloat(0.50), CGFloat(0.59)] {
+                needle(&p, pt: pt, cx: cx, baseY: 0.13, halfW: 0.019, tipY: 0.04)
             }
-            p.move(to: pt(0.44, 1.0))                        // gateway (hole)
+            p.move(to: pt(0.44, 1.0))                      // gateway (hole)
             p.addQuadCurve(to: pt(0.56, 1.0), control: pt(0.50, 0.72))
             p.closeSubpath()
 
@@ -939,6 +935,42 @@ struct LandmarkShape: Shape {
     }
 
     // MARK: Reusable pieces
+
+    /// A half-dome sitting ON `baseY` with a small flat top for a finial to abut.
+    /// Drawing a full circle over a drum would overlap it, and eoFill turns overlap
+    /// into a hole — which is what cut slits through every dome in the app.
+    private func domeCap(_ p: inout Path, pt: (CGFloat, CGFloat) -> CGPoint,
+                         cx: CGFloat, baseY: CGFloat, halfW: CGFloat, apexY: CGFloat,
+                         flat: CGFloat = 0.016) {
+        let k = (baseY - apexY) * 0.78
+        p.move(to: pt(cx - halfW, baseY))
+        p.addQuadCurve(to: pt(cx - flat, apexY), control: pt(cx - halfW, baseY - k))
+        p.addLine(to: pt(cx + flat, apexY))
+        p.addQuadCurve(to: pt(cx + halfW, baseY), control: pt(cx + halfW, baseY - k))
+        p.closeSubpath()
+    }
+
+    /// An onion dome: bulges wider than its base, then tapers to a flat top.
+    private func onionCap(_ p: inout Path, pt: (CGFloat, CGFloat) -> CGPoint,
+                          cx: CGFloat, baseY: CGFloat, halfW: CGFloat, apexY: CGFloat,
+                          flat: CGFloat = 0.013) {
+        let k = (baseY - apexY) * 0.62
+        p.move(to: pt(cx - halfW, baseY))
+        p.addQuadCurve(to: pt(cx - flat, apexY), control: pt(cx - halfW - 0.035, baseY - k))
+        p.addLine(to: pt(cx + flat, apexY))
+        p.addQuadCurve(to: pt(cx + halfW, baseY), control: pt(cx + halfW + 0.035, baseY - k))
+        p.closeSubpath()
+    }
+
+    /// A spire whose base is exactly the shaft it stands on. A base wider than the
+    /// shaft reads unmistakably as an arrow.
+    private func needle(_ p: inout Path, pt: (CGFloat, CGFloat) -> CGPoint,
+                        cx: CGFloat, baseY: CGFloat, halfW: CGFloat, tipY: CGFloat) {
+        p.move(to: pt(cx - halfW, baseY))
+        p.addLine(to: pt(cx + halfW, baseY))
+        p.addLine(to: pt(cx, tipY))
+        p.closeSubpath()
+    }
 
     private func tower(_ p: inout Path, pt: (CGFloat, CGFloat) -> CGPoint, cx: CGFloat) {
         func rectS(_ x0: CGFloat, _ y0: CGFloat, _ x1: CGFloat, _ y1: CGFloat) {
