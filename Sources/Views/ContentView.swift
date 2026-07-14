@@ -11,6 +11,13 @@ struct ContentView: View {
         viewModel.bundle?.current.code.sky ?? .clearNight
     }
 
+    /// Credit every source whose data is currently on screen.
+    private var attribution: String {
+        let base = "Weather and air quality from Open-Meteo"
+        guard viewModel.regionalNowcast != nil else { return base }
+        return base + "\nNowcast from NEA, via data.gov.sg"
+    }
+
     var body: some View {
         ZStack {
             AnimatedBackground(mood: mood)
@@ -102,9 +109,14 @@ struct ContentView: View {
 
                 DetailGridView(current: bundle.current, unit: viewModel.unit, timezone: timezone)
 
-                Text("Data from Open-Meteo")
+                // Attribution is a licence condition, not a courtesy: Singapore's
+                // Open Data Licence requires data.gov.sg/NEA to be credited wherever
+                // their data appears, and App Review checks third-party data terms.
+                Text(attribution)
                     .font(Theme.label(11))
                     .foregroundStyle(Color.welkinTertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
                     .padding(.top, 4)
                     .padding(.bottom, 30)
             }

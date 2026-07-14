@@ -84,6 +84,13 @@ struct AreaForecastSheet: View {
                                    ozone: bundle.ozone, no2: bundle.no2)
                 }
                 DetailGridView(current: bundle.current, unit: unit, timezone: bundle.timezone)
+
+                Text("Weather from Open-Meteo · Nowcast from NEA, via data.gov.sg")
+                    .font(Theme.label(11))
+                    .foregroundStyle(Color.welkinTertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
             }
             .padding(.horizontal, Theme.pad)
             .padding(.bottom, 30)
