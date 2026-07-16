@@ -112,9 +112,14 @@ size in search results, where the UI itself is illegible.
 ## Before you submit
 
 - [ ] **App Privacy labels.** Location is collected and *shared with a third
-      party* (coordinates go to Open-Meteo). Declare it as "Location — App
+      party* (coordinates go to Open-Meteo/NEA). Declare it as "Location — App
       Functionality — not linked to identity, not used for tracking". Getting
       this wrong is a rejection, and a false "no data collected" is worse.
+- [ ] **Background location review note.** "Follow my location" uses Always +
+      significant-change monitoring. In App Review notes, state plainly that it's
+      an opt-in setting powering local weather alerts and nothing else — Always
+      location draws extra scrutiny, and the reviewer needs to see a clear user
+      benefit. The privacy page already documents it.
 - [ ] **Support URL** is mandatory. If you register a domain, turn on WHOIS
       privacy — otherwise it publishes your name and address.
 - [ ] **Copyright field**: set it to the business name, not your own.

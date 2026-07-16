@@ -33,6 +33,9 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: "Welkin uses your location to show local weather and air quality."
+        # Required before requestAlwaysAuthorization can be called at all — without
+        # it the Always prompt is a hard crash. Opt-in, for location-following alerts.
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Welkin uses your location in the background only if you turn on location-following alerts, so rain and haze warnings match the area you're actually in."
         UIStatusBarStyle: UIStatusBarStyleLightContent
         UIViewControllerBasedStatusBarAppearance: false
         # Must reference the build settings, or the CI's build-number override

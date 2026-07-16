@@ -51,6 +51,18 @@ struct NotificationSettingsView: View {
                         .foregroundStyle(Color.welkinTertiary)
                 }
 
+                if settings.nearTermAlertsEnabled {
+                    Section {
+                        toggle("Follow my location", "location.fill", $settings.followLocation)
+                    } header: {
+                        Text("LOCATION").font(Theme.label(11)).foregroundStyle(Color.welkinTertiary)
+                    } footer: {
+                        Text("Lets the alerts above follow you between areas — so you get Bedok's rain when you're in Bedok, even if you haven't opened Welkin. Needs \u{201C}Always\u{201D} location access, and uses the low-power location radio.")
+                            .font(Theme.body(12))
+                            .foregroundStyle(Color.welkinTertiary)
+                    }
+                }
+
                 Section {
                     toggle("Daily briefing", "sun.horizon.fill", $settings.dailyBriefing)
 
@@ -81,7 +93,16 @@ struct NotificationSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .task { authorized = await NotificationService.shared.isAuthorized() }
-        .onChange(of: settings) { _, new in new.save() }
+        .onChange(of: settings) { _, new in
+            new.save()
+            // Follow only while it's on AND there's a near-term alert to follow;
+            // turning off the last alert should also stop the location watch.
+            if new.followLocation, new.nearTermAlertsEnabled {
+                LocationMonitor.shared.start()
+            } else {
+                LocationMonitor.shared.stop()
+            }
+        }
     }
 
     private func toggle(_ title: String, _ icon: String, _ value: Binding<Bool>) -> some View {

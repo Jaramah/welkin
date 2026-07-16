@@ -7,8 +7,15 @@ struct NotificationSettings: Codable, Equatable, Sendable {
     var severeAlerts: Bool = true
     var dailyBriefing: Bool = true
     var briefingHour: Int = 7          // 24-hour clock
+    /// Watch significant location changes so near-term alerts follow the user
+    /// between areas even when the app is closed. Needs Always authorization.
+    var followLocation: Bool = false
 
     var anyEnabled: Bool { rainAlerts || hazeAlerts || severeAlerts || dailyBriefing }
+
+    /// The alerts that depend on where you are. The daily briefing is scheduled
+    /// ahead against a fixed place, so following your location wouldn't help it.
+    var nearTermAlertsEnabled: Bool { rainAlerts || hazeAlerts || severeAlerts }
 
     private static let key = "notificationSettings"
 
