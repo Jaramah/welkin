@@ -58,7 +58,7 @@ struct NotificationService: Sendable {
     /// Rain within the next two hours — from the NEA nowcast for the user's own
     /// area when available, otherwise from the hourly precipitation probability.
     private func rainAlert(_ bundle: WeatherBundle, nowcast: RegionalNowcast?) async {
-        if let area = nearestArea(in: nowcast, to: bundle.place), isWet(area.forecast) {
+        if let area = nowcast?.area(for: bundle.place), isWet(area.forecast) {
             guard consume("rain", cooldown: 3 * 3600) else { return }
             await post(id: "rain",
                        title: "Rain expected in \(area.name)",
@@ -144,19 +144,6 @@ struct NotificationService: Sendable {
         let f = forecast.lowercased()
         return f.contains("rain") || f.contains("shower")
             || f.contains("thunder") || f.contains("drizzle")
-    }
-
-    private func nearestArea(in nowcast: RegionalNowcast?,
-                             to place: Place) -> RegionalNowcast.AreaForecast? {
-        guard let areas = nowcast?.areas else { return nil }
-        var best: (area: RegionalNowcast.AreaForecast, distance: Double)?
-        for area in areas {
-            guard let lat = area.latitude, let lon = area.longitude else { continue }
-            let dLat = lat - place.latitude, dLon = lon - place.longitude
-            let d = dLat * dLat + dLon * dLon           // squared degrees is enough to rank
-            if best == nil || d < best!.distance { best = (area, d) }
-        }
-        return best?.area
     }
 
     private func temp(_ value: Double, _ unit: TemperatureUnit) -> String {

@@ -29,8 +29,39 @@ struct RegionalNowcast: Sendable {
         }
     }
 
+    /// The NEA area for a place — the single source of truth for "which town's
+    /// nowcast applies to me", used by both the on-screen override and alerts.
+    ///
+    /// Name first, coordinates only as a fallback. NEA's `label_location` is a
+    /// labelling anchor, not the centre of the town: the "Bedok" anchor sits in
+    /// the south of Bedok, so a phone in Bedok North is physically closer to the
+    /// "Tampines" anchor and nearest-point matching hands it Tampines. The place
+    /// name from reverse geocoding already says "Bedok", and NEA has an area
+    /// called exactly that — so trust the name when it matches.
+    func area(for place: Place) -> AreaForecast? {
+        let name = place.name.lowercased()
+        if !name.isEmpty {
+            // Exact area name, then either side contained in the other, longest
+            // area name first so "Bedok Reservoir" prefers a "Bedok Reservoir"
+            // area over a bare "Bedok" if NEA ever splits them.
+            let byName = areas
+                .filter { a in
+                    let an = a.name.lowercased()
+                    if an == name { return true }
+                    // Substring matches only for names long enough not to collide by
+                    // accident — "City" and "Tuas" are short enough to appear inside
+                    // an unrelated word, so require an exact match for those.
+                    guard min(an.count, name.count) >= 5 else { return false }
+                    return name.contains(an) || an.contains(name)
+                }
+                .max { $0.name.count < $1.name.count }
+            if let byName { return byName }
+        }
+        return nearest(toLatitude: place.latitude, longitude: place.longitude)
+    }
+
     /// The area nearest a coordinate. NEA's 47 towns blanket the island, so the
-    /// closest one is the right nowcast for wherever you are standing.
+    /// closest one is a reasonable last resort when the name doesn't match.
     func nearest(toLatitude lat: Double, longitude lon: Double) -> AreaForecast? {
         areas
             .compactMap { area -> (AreaForecast, Double)? in
@@ -125,10 +156,7 @@ extension WeatherBundle {
     /// contradiction, one screen over. Keeping the rule in a single place is what
     /// stops the two from drifting apart again.
     func applyingLocalNowcast(_ nowcast: RegionalNowcast?) -> WeatherBundle {
-        guard let nowcast,
-              let area = nowcast.nearest(toLatitude: place.latitude,
-                                         longitude: place.longitude)
-        else { return self }
+        guard let nowcast, let area = nowcast.area(for: place) else { return self }
 
         var updated = self
         updated.current.code = area.weatherCode(isDay: current.code.isDay)
