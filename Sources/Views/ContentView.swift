@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = WeatherViewModel()
     @State private var showSearch = false
     @State private var scrollY: CGFloat = 0
@@ -49,6 +50,13 @@ struct ContentView: View {
             if case .idle = viewModel.phase {
                 await viewModel.loadCurrentLocation()
             }
+        }
+        // .task fires once per view lifetime, so on its own it never runs again after a
+        // cold launch — the app would follow you only until the first time you put it
+        // away. Coming back to the foreground is the moment to re-check.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await viewModel.refreshForForeground() }
         }
         .sheet(isPresented: $showSearch) {
             SearchView(viewModel: viewModel) { place in

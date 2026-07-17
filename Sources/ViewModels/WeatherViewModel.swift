@@ -29,6 +29,10 @@ final class WeatherViewModel {
     var refreshError: String?
     /// Singapore-only area nowcast (nil elsewhere or while unavailable).
     private(set) var regionalNowcast: RegionalNowcast?
+    /// When we last asked CoreLocation where we are.
+    private var lastLocationRefresh: Date?
+    /// Flicking between apps shouldn't re-fetch; coming back after a real absence should.
+    private static let foregroundRefreshInterval: TimeInterval = 60
     private let service = WeatherService()
     private let nea = NEAService()
     private let location = LocationManager()
@@ -129,12 +133,32 @@ final class WeatherViewModel {
         if bundle == nil { phase = .loading }
         do {
             let coord = try await location.requestCurrentLocation()
+            lastLocationRefresh = Date()
             await load(place: namedPlace(for: coord), followingLocation: true)
         } catch is CancellationError {
             // Superseded — keep the current screen.
         } catch {
             report(error)
         }
+    }
+
+    /// Re-check where we are when the app comes back to the foreground.
+    ///
+    /// The position used to be read once, on a cold launch, and never again unless you
+    /// pulled to refresh. But travelling with Welkin in your pocket is exactly the case
+    /// where the answer changes: cross town with the app backgrounded and it kept
+    /// insisting you were still where you set off. Opening the app is the clearest
+    /// statement of "tell me about here" there is, so it re-asks then.
+    ///
+    /// Only a GPS-followed place re-resolves. A city you searched for is a deliberate
+    /// choice and must stay put.
+    func refreshForForeground() async {
+        guard isFollowingLocation else { return }
+        if let lastLocationRefresh,
+           Date().timeIntervalSince(lastLocationRefresh) < Self.foregroundRefreshInterval {
+            return
+        }
+        await loadCurrentLocation()
     }
 
     func search(_ query: String) async -> [Place] {
