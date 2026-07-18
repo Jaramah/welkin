@@ -58,7 +58,7 @@ Everywhere else in the world, you get a fast, clean forecast with no ads, no
 account, and no tracking.
 
 YOUR CITY, NOT A STOCK PHOTO
-Every city gets its own hand-drawn landmark under a live sky — the Merlion, the
+Every city gets its own hand-drawn landmark under a live sky — the Esplanade, the
 Eiffel Tower, Charles Bridge, Machu Picchu, a gopuram, an acacia at sunset. Over
 100 cities, and the weather you see behind them is the weather outside.
 
@@ -98,7 +98,7 @@ The first release of Welkin.
 
 Order matters more than polish — most people never swipe past the second one.
 
-1. **The landmark hero.** Singapore, Merlion or Marina Bay Sands, weather behind
+1. **The landmark hero.** Singapore, the Esplanade or Marina Bay Sands, weather behind
    it. This is the only thing no competitor has. Lead with it.
 2. **The Regional Nowcast card**, showing several areas disagreeing with each
    other. This is the "oh, I need that" screenshot for a Singapore audience.

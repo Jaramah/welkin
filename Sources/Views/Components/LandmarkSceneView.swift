@@ -75,7 +75,7 @@ struct LandmarkSceneView: View {
                                return Color(red: 0.13, green: 0.17, blue: 0.24)   // glass & steel
         case .templeOfHeaven:  return Color(red: 0.10, green: 0.22, blue: 0.30)   // blue roofs
         case .burjAlArab:      return Color(red: 0.10, green: 0.18, blue: 0.32)   // sail
-        case .merlion:         return Color(red: 0.26, green: 0.28, blue: 0.30)   // white stone
+        case .esplanade:       return Color(red: 0.30, green: 0.25, blue: 0.15)   // bronze sunshades
         case .torii:           return Color(red: 0.50, green: 0.13, blue: 0.11)   // vermillion
         case .watArun, .angkorWat, .gatewayOfIndia, .belemTower:
                                return Color(red: 0.30, green: 0.26, blue: 0.19)   // temple stone

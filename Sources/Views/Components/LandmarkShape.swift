@@ -436,52 +436,15 @@ struct LandmarkShape: Shape {
             poly([(0.06, 0.84), (0.11, 0.56), (0.16, 0.84)])
             poly([(0.84, 0.84), (0.89, 0.56), (0.94, 0.84)])
 
-        case .merlion:
-            // A lion's head in profile — blunt muzzle, mane swept back — on a fish
-            // body with a curling tail. Drawn as ONE closed outline: under eoFill any
-            // overlap between separate shapes punches a hole.
-            //
-            // No water jet. A stream leaving the mouth sits right where a beak would
-            // be, and the eye fuses the two: every version with a spout read as a
-            // rooster, however the rest of the body was drawn.
-            p.move(to: pt(0.375, 0.94))
-            p.addQuadCurve(to: pt(0.350, 0.566), control: pt(0.334, 0.764))  // chest
-            p.addLine(to: pt(0.338, 0.516))
-            p.addLine(to: pt(0.330, 0.500))     // jaw
-            p.addLine(to: pt(0.276, 0.494))     // chin
-            p.addLine(to: pt(0.254, 0.456))     // blunt, squared muzzle
-            p.addLine(to: pt(0.250, 0.430))
-            p.addLine(to: pt(0.302, 0.404))     // open mouth
-            p.addLine(to: pt(0.248, 0.378))
-            p.addLine(to: pt(0.254, 0.348))
-            p.addLine(to: pt(0.288, 0.318))
-            p.addLine(to: pt(0.322, 0.292))     // brow
-            p.addLine(to: pt(0.364, 0.258))     // crown
-            // Mane: locks sweeping backward, the way a lion's mane lies. Radiating
-            // spikes read as a cockscomb.
-            let mane: [((CGFloat, CGFloat), (CGFloat, CGFloat))] = [
-                ((0.402, 0.148), (0.434, 0.230)),
-                ((0.484, 0.116), (0.504, 0.234)),
-                ((0.564, 0.146), (0.562, 0.264)),
-                ((0.628, 0.212), (0.608, 0.310)),
-                ((0.664, 0.298), (0.622, 0.372)),
-            ]
-            for (tip, valley) in mane {
-                p.addLine(to: pt(tip.0, tip.1))
-                p.addLine(to: pt(valley.0, valley.1))
-            }
-            p.addLine(to: pt(0.666, 0.400))     // nape
-            p.addLine(to: pt(0.602, 0.470))     // shoulder
-            p.addQuadCurve(to: pt(0.648, 0.734), control: pt(0.636, 0.598))  // fish body
-            p.addQuadCurve(to: pt(0.788, 0.700), control: pt(0.726, 0.784))  // tail, curling low
-            p.addLine(to: pt(0.900, 0.590))     // fluke, upper blade
-            p.addLine(to: pt(0.858, 0.700))
-            p.addLine(to: pt(0.946, 0.760))     // fluke, lower blade
-            p.addLine(to: pt(0.826, 0.798))
-            p.addQuadCurve(to: pt(0.562, 0.902), control: pt(0.690, 0.884))  // underside
-            p.addLine(to: pt(0.514, 0.94))
-            p.closeSubpath()
-            rectShape(0.30, 1.00, 0.70, 0.94)   // plinth (abuts, never overlaps)
+        case .esplanade:
+            // Esplanade – Theatres on the Bay: the twin domes Singaporeans call "the
+            // durian", skinned in the triangular aluminium sunshades that give the
+            // roofs their spiky silhouette. Two spiky domes on a low podium, with a
+            // cleft between them so the two shells never overlap — under eoFill any
+            // overlap would punch a white hole down the middle.
+            spikyDome(&p, pt: pt, cx: 0.32, rx: 0.17, base: 0.86, height: 0.34, spikes: 13)
+            spikyDome(&p, pt: pt, cx: 0.68, rx: 0.17, base: 0.86, height: 0.31, spikes: 13)
+            rectShape(0.05, 0.985, 0.95, 0.86)  // podium (abuts the domes, never overlaps)
 
         case .singaporeFlyer:
             let fx: CGFloat = 0.50, fy: CGFloat = 0.40, fr: CGFloat = 0.32
@@ -1078,6 +1041,36 @@ struct LandmarkShape: Shape {
         let nx = -dy / len * th, ny = dx / len * th
         p.move(to: pt(a.0 + nx, a.1 + ny)); p.addLine(to: pt(b.0 + nx, b.1 + ny))
         p.addLine(to: pt(b.0 - nx, b.1 - ny)); p.addLine(to: pt(a.0 - nx, a.1 - ny)); p.closeSubpath()
+    }
+
+    /// A low dome whose whole arched contour is a sawtooth of triangular spikes — the
+    /// aluminium sunshades that make the Esplanade roofs read as a durian. Drawn as ONE
+    /// closed subpath: valley points ride the dome arc, spike tips sit just outside it,
+    /// and the base closes flat, so a single dome never self-overlaps and eoFill cuts no
+    /// hole. The caller keeps the two domes apart so they don't overlap each other.
+    private func spikyDome(_ p: inout Path, pt: (CGFloat, CGFloat) -> CGPoint,
+                           cx: CGFloat, rx: CGFloat, base: CGFloat, height: CGFloat, spikes: Int) {
+        p.move(to: pt(cx - rx, base))
+        for i in 0..<spikes {
+            let t0 = Double(i) / Double(spikes)
+            let t1 = (Double(i) + 0.5) / Double(spikes)
+            let a0 = Double.pi * (1 - t0)          // left rim (pi) sweeping to right rim (0)
+            let a1 = Double.pi * (1 - t1)
+            // Valley: a point on the smooth dome arc.
+            let vx = cx + rx * CGFloat(cos(a0))
+            let vy = base - height * CGFloat(sin(a0))
+            p.addLine(to: pt(vx, vy))
+            // Spike: the next arc point, nudged outward along the arc normal.
+            let sx = cx + rx * CGFloat(cos(a1))
+            let sy = base - height * CGFloat(sin(a1))
+            // Spikes stand tallest over the crown and shrink toward the base, so the
+            // sides stay clean (and the two shells' base spikes never meet in the cleft).
+            let sl = 0.010 + 0.026 * CGFloat(sin(a1))
+            let nx = CGFloat(cos(a1)), ny = -CGFloat(sin(a1))
+            p.addLine(to: pt(sx + nx * sl, sy + ny * sl))
+        }
+        p.addLine(to: pt(cx + rx, base))
+        p.closeSubpath()
     }
 
     /// Approximate y of a parabolic arch at x (for bridge hangers).

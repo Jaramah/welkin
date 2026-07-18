@@ -12,7 +12,7 @@ enum LandmarkKind: Sendable, CaseIterable {
     case theShard, tokyoSkytree, transamerica, sydneyHarbourBridge, burjAlArab, reichstag
     case capitolBuilding, sugarloaf, superTrees, gatewayArch, petronasTowers, chichenItza
     case atomium, templeOfHeaven, hagiaSophia, windmill, indiaGate
-    case merlion, singaporeFlyer
+    case esplanade, singaporeFlyer
     // Wider world
     case taipei101, orientalPearl, gatewayOfIndia, watArun, namsanTower, bankOfChina
     case torii, monas, skyTower, belemTower, angkorWat
@@ -76,7 +76,7 @@ enum LandmarkKind: Sendable, CaseIterable {
         case .hagiaSophia:       return "Hagia Sophia"
         case .windmill:          return "Dutch Windmills"
         case .indiaGate:         return "India Gate"
-        case .merlion:           return "The Merlion"
+        case .esplanade:         return "Esplanade Theatres"
         case .singaporeFlyer:    return "Singapore Flyer"
         case .taipei101:         return "Taipei 101"
         case .orientalPearl:     return "Oriental Pearl Tower"
@@ -156,7 +156,7 @@ enum LandmarkCatalog {
               keywords: ["washington", "district of columbia"], lat: 38.9072, lon: -77.0369),
         .init(city: "Rio de Janeiro", kinds: [.christRedeemer, .sugarloaf],
               keywords: ["rio de janeiro", "rio"], lat: -22.9068, lon: -43.1729),
-        .init(city: "Singapore", kinds: [.marinaBaySands, .superTrees, .merlion, .singaporeFlyer],
+        .init(city: "Singapore", kinds: [.marinaBaySands, .superTrees, .esplanade, .singaporeFlyer],
               keywords: ["singapore"], lat: 1.3521, lon: 103.8198),
         // Single-landmark cities
         .init(city: "Seattle", kinds: [.spaceNeedle], keywords: ["seattle"], lat: 47.6062, lon: -122.3321),

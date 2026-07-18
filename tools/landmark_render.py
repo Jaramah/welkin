@@ -126,6 +126,24 @@ def onionCap(p, cx, baseY, halfW, apexY, flat=0.013):
 def needle(p, cx, baseY, halfW, tipY):
     p.poly([(cx - halfW, baseY), (cx + halfW, baseY), (cx, tipY)])
 
+def spikyDome(p, cx, rx, base, height, spikes):
+    p.move(cx - rx, base)
+    for i in range(spikes):
+        t0 = float(i) / float(spikes)
+        t1 = (float(i) + 0.5) / float(spikes)
+        a0 = math.pi * (1 - t0)
+        a1 = math.pi * (1 - t1)
+        vx = cx + rx * math.cos(a0)
+        vy = base - height * math.sin(a0)
+        p.line(vx, vy)
+        sx = cx + rx * math.cos(a1)
+        sy = base - height * math.sin(a1)
+        sl = 0.010 + 0.026 * math.sin(a1)
+        nx = math.cos(a1); ny = -math.sin(a1)
+        p.line(sx + nx * sl, sy + ny * sl)
+    p.line(cx + rx, base)
+    p.close()
+
 # ---------------------------------------------------------------- transpiler
 def join_calls(lines):
     """Join continuation lines so each statement has balanced parens/brackets."""
@@ -244,7 +262,7 @@ def render_kind(names, body):
     code = "\n".join(pysrc)
     env = dict(p=p, math=math, ASPECT=ASPECT, bar=bar, bandArch=bandArch, tower=tower,
                cable=cable, sail=sail, onionTower=onionTower, palm=palm, archHole=archHole,
-               domeHalf=domeHalf, domeCap=domeCap, onionCap=onionCap, needle=needle, superTree=superTree, spikes=spikes, archY=archY,
+               domeHalf=domeHalf, domeCap=domeCap, onionCap=onionCap, needle=needle, spikyDome=spikyDome, superTree=superTree, spikes=spikes, archY=archY,
                abs=abs, min=min, max=max, range=range, float=float, int=int, len=len)
     exec(code, env)
     return p
