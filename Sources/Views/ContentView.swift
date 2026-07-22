@@ -18,14 +18,15 @@ struct ContentView: View {
         if viewModel.regionalNowcast != nil {
             lines.append("Nowcast from NEA, via data.gov.sg")
         }
-        // The weather backdrops are public-domain photographs from Wikimedia Commons.
-        lines.append("Weather backgrounds via Wikimedia Commons")
+        // Backdrops (the place photo, and the bundled weather fallbacks) come from
+        // Wikimedia Commons; a fetched place photo also carries its own credit on-screen.
+        lines.append("Backgrounds via Wikimedia Commons")
         return lines.joined(separator: "\n")
     }
 
     var body: some View {
         ZStack {
-            ConditionBackground(mood: mood)
+            PlaceBackground(place: viewModel.bundle?.place ?? viewModel.currentPlace, mood: mood)
                 .accessibilityHidden(true)
 
             // Full-screen weather that matches the location: rain, snow, storms, stars.
