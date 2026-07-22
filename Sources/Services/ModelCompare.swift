@@ -131,11 +131,13 @@ struct ModelCompareService {
         formatter.timeZone = TimeZone(identifier: decoded.timezone ?? "UTC") ?? .current
         formatter.dateFormat = "yyyy-MM-dd"
 
+        // Parallel arrays; walk only the length they all share so an index is always valid.
+        let count = min(daily.time.count, daily.temperature_2m_max.count, daily.weather_code.count)
         var rows: [Row] = []
-        for (index, day) in daily.time.enumerated() {
-            guard let date = formatter.date(from: day),
-                  let high = daily.temperature_2m_max[safe: index].flatMap({ $0 }),
-                  let raw = daily.weather_code[safe: index].flatMap({ $0 }) else { continue }
+        for index in 0..<count {
+            guard let date = formatter.date(from: daily.time[index]),
+                  let high = daily.temperature_2m_max[index],
+                  let raw = daily.weather_code[index] else { continue }
             rows.append(Row(date: date, high: high, code: WeatherCode(raw: raw, isDay: true)))
         }
         guard !rows.isEmpty else { return nil }
