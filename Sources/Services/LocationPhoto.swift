@@ -51,12 +51,51 @@ actor LocationPhotoStore {
 
     private func fetch(for place: Place) async throws -> LocationPhoto? {
         for title in Self.candidateTitles(for: place) {
-            guard let (thumbURL, fileTitle) = try await pageImage(title: title) else { continue }
-            let credit = try? await imageCredit(fileTitle: fileTitle)
-            let data = try await get(thumbURL)
-            // A skyline, not a 1-KB flag or map pin. Also weeds out error bodies.
-            guard data.count > 3_000 else { continue }
-            return LocationPhoto(data: data, credit: credit)
+            // 1) A real cityscape from a Commons search. This is what keeps Singapore a
+            //    skyline rather than the national flag its Wikipedia article leads with —
+            //    the article's lead image is often a flag, map or crest, not a photo.
+            if let photo = try await commonsPhoto(matching: title) { return photo }
+
+            // 2) Fall back to the article's own lead image for places a search misses.
+            if let (thumbURL, fileTitle) = try await pageImage(title: title) {
+                let credit = try? await imageCredit(fileTitle: fileTitle)
+                let data = try await get(thumbURL)
+                guard data.count > 3_000 else { continue }   // weed out error bodies
+                return LocationPhoto(data: data, credit: credit)
+            }
+        }
+        return nil
+    }
+
+    /// A landscape cityscape photo, searched on Wikimedia Commons by place name — it finds
+    /// an actual skyline instead of whatever image an article happens to lead with.
+    private func commonsPhoto(matching title: String) async throws -> LocationPhoto? {
+        var comps = URLComponents(string: "https://commons.wikimedia.org/w/api.php")!
+        comps.queryItems = [
+            .init(name: "action", value: "query"),
+            .init(name: "format", value: "json"),
+            .init(name: "formatversion", value: "2"),
+            .init(name: "generator", value: "search"),
+            .init(name: "gsrsearch", value: "\(title) skyline cityscape filetype:bitmap"),
+            .init(name: "gsrnamespace", value: "6"),
+            .init(name: "gsrlimit", value: "12"),
+            .init(name: "prop", value: "imageinfo"),
+            .init(name: "iiprop", value: "url|extmetadata|size"),
+            .init(name: "iiurlwidth", value: "1200"),
+        ]
+        let data = try await get(comps.url!)
+        let decoded = try JSONDecoder().decode(CommonsResponse.self, from: data)
+        guard let pages = decoded.query?.pages else { return nil }
+
+        // Keep search relevance order, but take only clearly landscape shots: a skyline
+        // is wide, so this drops portraits, flags and square logos in one test.
+        for page in pages.sorted(by: { ($0.index ?? .max) < ($1.index ?? .max) }) {
+            guard let info = page.imageinfo?.first,
+                  let thumb = info.thumburl, let url = URL(string: thumb) else { continue }
+            if let w = info.width, let h = info.height, Double(w) < Double(h) * 1.3 { continue }
+            let imgData = try await get(url)
+            guard imgData.count > 8_000 else { continue }
+            return LocationPhoto(data: imgData, credit: Self.credit(from: info.extmetadata))
         }
         return nil
     }
@@ -97,11 +136,15 @@ actor LocationPhotoStore {
         ]
         let data = try await get(comps.url!)
         let decoded = try JSONDecoder().decode(ImageInfoResponse.self, from: data)
-        let meta = decoded.query?.pages.first?.imageinfo?.first?.extmetadata
+        return Self.credit(from: decoded.query?.pages.first?.imageinfo?.first?.extmetadata)
+    }
+
+    /// Build the on-image credit from a file's extmetadata (author + licence).
+    nonisolated private static func credit(from meta: ImageInfoResponse.Meta?) -> String? {
         // Parenthesised so `.map` applies to the optional String, not to the String's
         // characters (String is a Sequence, and `value.map` would map over those).
         let rawArtist = meta?.Artist?.value
-        let artist = rawArtist.map(Self.stripHTML).flatMap { $0.isEmpty ? nil : $0 }
+        let artist = rawArtist.map(stripHTML).flatMap { $0.isEmpty ? nil : $0 }
         let licence = meta?.LicenseShortName?.value
 
         switch (artist, licence) {
@@ -207,5 +250,20 @@ private struct ImageInfoResponse: Decodable {
         let LicenseShortName: Field?
     }
     struct Field: Decodable { let value: String }
+    let query: Query?
+}
+
+private struct CommonsResponse: Decodable {
+    struct Query: Decodable { let pages: [Page] }
+    struct Page: Decodable {
+        let index: Int?
+        let imageinfo: [Info]?
+    }
+    struct Info: Decodable {
+        let thumburl: String?
+        let width: Int?
+        let height: Int?
+        let extmetadata: ImageInfoResponse.Meta?
+    }
     let query: Query?
 }
