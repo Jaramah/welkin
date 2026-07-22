@@ -23,7 +23,7 @@ struct AreaForecastSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedBackground(mood: mood)
+                ConditionBackground(mood: mood)
                     .ignoresSafeArea()
                     .accessibilityHidden(true)
 

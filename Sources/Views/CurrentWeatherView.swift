@@ -35,15 +35,8 @@ struct CurrentWeatherView: View {
             .foregroundStyle(Color.welkinSecondary)
             .padding(.bottom, 6)
 
-            // Signature hero: a real photo of this place, under the live sky.
-            PhotoHeroView(
-                place: place,
-                code: current.code,
-                sky: current.code.sky,
-                scrollOffset: scrollOffset
-            )
-
-            // Location sits below the photo.
+            // The place name. The scene behind it is now the full-screen condition
+            // photo, so the hero card is gone — the reading sits straight on the sky.
             Text(place.name)
                 .font(Theme.title(24))
                 .foregroundStyle(Color.welkinPrimary)
