@@ -4,10 +4,9 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = WeatherViewModel()
     @State private var showSearch = false
+    @State private var scrollY: CGFloat = 0
     /// A Regional Nowcast area being previewed in a sheet (nil when closed).
     @State private var selectedArea: RegionalNowcast.AreaForecast?
-    /// A brief message shown when a not-yet-built tab is tapped.
-    @State private var toast: String?
 
     private var mood: SkyMood {
         viewModel.bundle?.current.code.sky ?? .clearNight
@@ -15,19 +14,14 @@ struct ContentView: View {
 
     /// Credit every source whose data is currently on screen.
     private var attribution: String {
-        var lines = ["Weather and air quality from Open-Meteo"]
-        if viewModel.regionalNowcast != nil {
-            lines.append("Nowcast from NEA, via data.gov.sg")
-        }
-        // Backdrops (the place photo, and the bundled weather fallbacks) come from
-        // Wikimedia Commons; a fetched place photo also carries its own credit on-screen.
-        lines.append("Backgrounds via Wikimedia Commons")
-        return lines.joined(separator: "\n")
+        let base = "Weather and air quality from Open-Meteo"
+        guard viewModel.regionalNowcast != nil else { return base }
+        return base + "\nNowcast from NEA, via data.gov.sg"
     }
 
     var body: some View {
         ZStack {
-            PlaceBackground(place: viewModel.bundle?.place ?? viewModel.currentPlace, mood: mood)
+            AnimatedBackground(mood: mood)
                 .accessibilityHidden(true)
 
             // Full-screen weather that matches the location: rain, snow, storms, stars.
@@ -50,22 +44,7 @@ struct ContentView: View {
                 loadedContent(bundle)
             }
 
-            // Controls float over the photo: a small unit toggle, and the tab bar.
-            if viewModel.bundle != nil {
-                unitToggle
-                VStack {
-                    Spacer()
-                    WelkinTabBar(active: .weather,
-                                 onSelect: handleTab,
-                                 onSearch: { showSearch = true })
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, 6)
-                }
-            }
-
-            if let toast {
-                ToastView(text: toast)
-            }
+            topBar
         }
         .task {
             if case .idle = viewModel.phase {
@@ -103,127 +82,93 @@ struct ContentView: View {
     @ViewBuilder
     private func loadedContent(_ bundle: WeatherBundle) -> some View {
         let timezone = bundle.timezone
-        GeometryReader { geo in
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    // The first screen is a fixed height so the header pins to the top
-                    // and the hourly strip pins to the bottom, just above the tab bar,
-                    // with the photo breathing between them. The Spacer does the work —
-                    // no magic offset that drifts by device. Detail cards come below.
-                    VStack(spacing: 0) {
-                        if let message = viewModel.refreshError {
-                            RefreshErrorBanner(message: message)
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 10)
-                        }
-
-                        HeroHeader(place: bundle.place, current: bundle.current,
-                                   unit: viewModel.unit, onToggleUnit: toggleUnit)
-                            .padding(.top, 14)
-
-                        Spacer(minLength: 24)
-
-                        if !bundle.hourly.isEmpty {
-                            HourlyStrip(hours: bundle.hourly, timezone: timezone)
-                                .padding(.horizontal, 14)
-                        }
-                    }
-                    .frame(height: max(320, geo.size.height - 104))
-
-                    VStack(spacing: 14) {
-                        if !bundle.daily.isEmpty {
-                            DailyForecastView(days: bundle.daily, timezone: timezone)
-                        }
-
-                        // How much three major models disagree over the next few days —
-                        // best-effort, and hides itself when it can't reach them.
-                        ModelCompareView(place: bundle.place, unit: viewModel.unit)
-
-                        if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
-                            // Opens the area in a sheet — it must not replace the
-                            // location the main screen is showing.
-                            RegionalNowcastView(nowcast: nowcast) { area in
-                                selectedArea = area
-                            }
-                        }
-
-                        if let aqi = bundle.aqiNow {
-                            AirQualityView(aqi: aqi, pm25: bundle.pm25, pm10: bundle.pm10,
-                                           ozone: bundle.ozone, no2: bundle.no2)
-                        }
-
-                        DetailGridView(current: bundle.current, unit: viewModel.unit,
-                                       timezone: timezone)
-
-                        // Attribution is a licence condition, not a courtesy: Singapore's
-                        // Open Data Licence requires data.gov.sg/NEA to be credited
-                        // wherever their data appears, and App Review checks data terms.
-                        Text(attribution)
-                            .font(Theme.label(11))
-                            .foregroundStyle(Color.welkinTertiary)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 4)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 22)
-                    .padding(.bottom, 120)      // clear the floating tab bar
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                if let message = viewModel.refreshError {
+                    RefreshErrorBanner(message: message)
+                        .padding(.top, 4)
                 }
+
+                CurrentWeatherView(place: bundle.place, current: bundle.current,
+                                   unit: viewModel.unit, scrollOffset: scrollY)
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
+
+                if !bundle.hourly.isEmpty {
+                    HourlyForecastView(hours: bundle.hourly, timezone: timezone)
+                }
+
+                if !bundle.daily.isEmpty {
+                    DailyForecastView(days: bundle.daily, timezone: timezone)
+                }
+
+                if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
+                    // Opens the area in a sheet — it must not replace the location
+                    // the main screen is showing.
+                    RegionalNowcastView(nowcast: nowcast) { area in
+                        selectedArea = area
+                    }
+                }
+
+                if let aqi = bundle.aqiNow {
+                    AirQualityView(aqi: aqi, pm25: bundle.pm25, pm10: bundle.pm10,
+                                   ozone: bundle.ozone, no2: bundle.no2)
+                }
+
+                DetailGridView(current: bundle.current, unit: viewModel.unit, timezone: timezone)
+
+                // Attribution is a licence condition, not a courtesy: Singapore's
+                // Open Data Licence requires data.gov.sg/NEA to be credited wherever
+                // their data appears, and App Review checks third-party data terms.
+                Text(attribution)
+                    .font(Theme.label(11))
+                    .foregroundStyle(Color.welkinTertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                    .padding(.bottom, 30)
             }
-            .refreshable { await reload() }
+            .padding(.horizontal, Theme.pad)
         }
-        .ignoresSafeArea(.container, edges: .bottom)
+        .onScrollGeometryChange(for: CGFloat.self) { geo in
+            geo.contentOffset.y
+        } action: { _, newValue in
+            scrollY = newValue
+        }
+        .refreshable { await reload() }
     }
 
-    /// Small unit toggle, top-right, clear of the hero.
-    private var unitToggle: some View {
+    private var topBar: some View {
         VStack {
             HStack {
-                Spacer()
-                Button(action: toggleUnit) {
-                    Text(viewModel.unit.symbol)
-                        .font(.system(size: 15, weight: .semibold))
+                Button { showSearch = true } label: {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                                .overlay(Circle().fill(Color.black.opacity(0.42)))
-                        )
-                        .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 0.5))
+                        .frame(width: 40, height: 40)
+                        .glassSurface(cornerRadius: 20)
+                }
+                .accessibilityLabel("Search locations")
+
+                Spacer()
+
+                Button {
+                    withAnimation(.snappy) {
+                        viewModel.unit = viewModel.unit == .fahrenheit ? .celsius : .fahrenheit
+                    }
+                } label: {
+                    Text(viewModel.unit.symbol)
+                        .font(Theme.title(16))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .glassSurface(cornerRadius: 20)
                 }
                 .accessibilityLabel("Temperature unit")
                 .accessibilityValue(viewModel.unit == .celsius ? "Celsius" : "Fahrenheit")
                 .accessibilityHint("Double tap to switch units")
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.horizontal, Theme.pad)
             Spacer()
-        }
-    }
-
-    private func toggleUnit() {
-        withAnimation(.snappy) {
-            viewModel.unit = viewModel.unit == .fahrenheit ? .celsius : .fahrenheit
-        }
-    }
-
-    private func handleTab(_ tab: WelkinTab) {
-        switch tab {
-        case .weather:
-            break   // already here
-        case .rain:
-            showToast("Rain view is coming soon")
-        case .photos:
-            showToast("Photos are coming soon")
-        }
-    }
-
-    private func showToast(_ text: String) {
-        withAnimation(.easeOut(duration: 0.2)) { toast = text }
-        Task {
-            try? await Task.sleep(for: .seconds(1.8))
-            withAnimation(.easeOut(duration: 0.3)) { toast = nil }
         }
     }
 
@@ -236,30 +181,6 @@ struct ContentView: View {
         } else {
             await viewModel.loadCurrentLocation()
         }
-    }
-}
-
-/// A brief, non-blocking message above the tab bar — used for tabs that aren't built yet.
-private struct ToastView: View {
-    let text: String
-    var body: some View {
-        VStack {
-            Spacer()
-            Text(text)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(
-                    Capsule()
-                        .fill(.ultraThinMaterial)
-                        .overlay(Capsule().fill(Color.black.opacity(0.5)))
-                )
-                .overlay(Capsule().stroke(.white.opacity(0.14), lineWidth: 0.5))
-                .padding(.bottom, 96)
-        }
-        .transition(.opacity)
-        .allowsHitTesting(false)
     }
 }
 

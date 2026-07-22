@@ -6,9 +6,11 @@ struct CurrentWeatherView: View {
     let unit: TemperatureUnit
     var scrollOffset: CGFloat = 0
 
+    private var landmark: Landmark { LandmarkCatalog.landmark(for: place) }
+
     var body: some View {
         VStack(spacing: 4) {
-            // Temperature + condition sit above the photo.
+            // Temperature + condition sit above the landmark.
             Text(tempString(current.temperature))
                 .font(Theme.display(88))
                 .foregroundStyle(Color.welkinPrimary)
@@ -35,20 +37,27 @@ struct CurrentWeatherView: View {
             .foregroundStyle(Color.welkinSecondary)
             .padding(.bottom, 6)
 
-            // The place name. The scene behind it is now the full-screen condition
-            // photo, so the hero card is gone — the reading sits straight on the sky.
+            // Signature landmark scene — the city's icon under live weather.
+            LandmarkSceneView(
+                landmark: landmark,
+                code: current.code,
+                sky: current.code.sky,
+                sunrise: current.sunrise,
+                sunset: current.sunset,
+                scrollOffset: scrollOffset
+            )
+
+            // Location sits below the landmark.
             Text(place.name)
                 .font(Theme.title(24))
                 .foregroundStyle(Color.welkinPrimary)
                 .lineLimit(1)
                 .padding(.top, 8)
 
-            if !place.subtitle.isEmpty {
-                Label(place.subtitle, systemImage: "mappin.and.ellipse")
-                    .font(Theme.label(11))
-                    .tracking(1)
-                    .foregroundStyle(Color.welkinTertiary)
-            }
+            Label(landmark.name, systemImage: "mappin.and.ellipse")
+                .font(Theme.label(11))
+                .tracking(1)
+                .foregroundStyle(Color.welkinTertiary)
 
             // A fact about this place — inline, no card. Tap for another.
             CityFactView(place: place)
