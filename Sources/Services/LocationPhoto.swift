@@ -98,10 +98,13 @@ actor LocationPhotoStore {
         let data = try await get(comps.url!)
         let decoded = try JSONDecoder().decode(ImageInfoResponse.self, from: data)
         let meta = decoded.query?.pages.first?.imageinfo?.first?.extmetadata
-        let artist = meta?.Artist?.value.map(Self.stripHTML)
+        // Parenthesised so `.map` applies to the optional String, not to the String's
+        // characters (String is a Sequence, and `value.map` would map over those).
+        let rawArtist = meta?.Artist?.value
+        let artist = rawArtist.map(Self.stripHTML).flatMap { $0.isEmpty ? nil : $0 }
         let licence = meta?.LicenseShortName?.value
 
-        switch (artist?.isEmpty == false ? artist : nil, licence) {
+        switch (artist, licence) {
         case let (author?, lic?): return "Photo: \(author) · \(lic)"
         case let (author?, nil):  return "Photo: \(author)"
         case let (nil, lic?):     return "Photo: Wikimedia · \(lic)"
