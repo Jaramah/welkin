@@ -107,6 +107,10 @@ struct ContentView: View {
                     DailyForecastView(days: bundle.daily, timezone: timezone)
                 }
 
+                // How much three major models disagree over the next few days —
+                // best-effort, and hides itself when it can't reach them.
+                ModelCompareView(place: bundle.place, unit: viewModel.unit)
+
                 if let nowcast = viewModel.regionalNowcast, !nowcast.areas.isEmpty {
                     // Opens the area in a sheet — it must not replace the location
                     // the main screen is showing.
