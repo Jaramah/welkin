@@ -57,10 +57,11 @@ full forecast without losing your own.
 Everywhere else in the world, you get a fast, clean forecast with no ads, no
 account, and no tracking.
 
-YOUR CITY, NOT A STOCK PHOTO
-Every city gets its own hand-drawn landmark under a live sky — the Esplanade, the
-Eiffel Tower, Charles Bridge, Machu Picchu, a gopuram, an acacia at sunset. Over
-100 cities, and the weather you see behind them is the weather outside.
+YOUR CITY, UNDER LIVE WEATHER
+Every place gets a real photograph of itself under a live sky — the actual
+skyline, harbour or old town, with the rain, snow and sun of the moment drawn
+over it. The picture is your city; the weather on top of it is the weather
+outside.
 
 WHAT YOU GET
 • Two-hour nowcast for all 47 Singapore areas, from NEA

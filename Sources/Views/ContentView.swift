@@ -14,9 +14,14 @@ struct ContentView: View {
 
     /// Credit every source whose data is currently on screen.
     private var attribution: String {
-        let base = "Weather and air quality from Open-Meteo"
-        guard viewModel.regionalNowcast != nil else { return base }
-        return base + "\nNowcast from NEA, via data.gov.sg"
+        var lines = ["Weather and air quality from Open-Meteo"]
+        if viewModel.regionalNowcast != nil {
+            lines.append("Nowcast from NEA, via data.gov.sg")
+        }
+        // Each photo also carries its own author + licence on the image itself; this
+        // is the general source credit.
+        lines.append("City photos via Wikimedia Commons")
+        return lines.joined(separator: "\n")
     }
 
     var body: some View {

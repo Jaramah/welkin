@@ -6,11 +6,9 @@ struct CurrentWeatherView: View {
     let unit: TemperatureUnit
     var scrollOffset: CGFloat = 0
 
-    private var landmark: Landmark { LandmarkCatalog.landmark(for: place) }
-
     var body: some View {
         VStack(spacing: 4) {
-            // Temperature + condition sit above the landmark.
+            // Temperature + condition sit above the photo.
             Text(tempString(current.temperature))
                 .font(Theme.display(88))
                 .foregroundStyle(Color.welkinPrimary)
@@ -37,27 +35,27 @@ struct CurrentWeatherView: View {
             .foregroundStyle(Color.welkinSecondary)
             .padding(.bottom, 6)
 
-            // Signature landmark scene — the city's icon under live weather.
-            LandmarkSceneView(
-                landmark: landmark,
+            // Signature hero: a real photo of this place, under the live sky.
+            PhotoHeroView(
+                place: place,
                 code: current.code,
                 sky: current.code.sky,
-                sunrise: current.sunrise,
-                sunset: current.sunset,
                 scrollOffset: scrollOffset
             )
 
-            // Location sits below the landmark.
+            // Location sits below the photo.
             Text(place.name)
                 .font(Theme.title(24))
                 .foregroundStyle(Color.welkinPrimary)
                 .lineLimit(1)
                 .padding(.top, 8)
 
-            Label(landmark.name, systemImage: "mappin.and.ellipse")
-                .font(Theme.label(11))
-                .tracking(1)
-                .foregroundStyle(Color.welkinTertiary)
+            if !place.subtitle.isEmpty {
+                Label(place.subtitle, systemImage: "mappin.and.ellipse")
+                    .font(Theme.label(11))
+                    .tracking(1)
+                    .foregroundStyle(Color.welkinTertiary)
+            }
 
             // A fact about this place — inline, no card. Tap for another.
             CityFactView(place: place)
