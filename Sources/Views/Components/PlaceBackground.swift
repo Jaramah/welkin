@@ -41,9 +41,25 @@ struct PlaceBackground: View {
                     .transition(.opacity)
             }
 
-            // Legibility scrim: darken the top (temperature) and bottom (cards).
+            // Legibility scrims. White type has to stay readable over a *bright* photo —
+            // a noon sky is nearly white — so the top and bottom are darkened firmly, not
+            // subtly. Two gradients, so the clear middle band stays generous.
             LinearGradient(
-                colors: [.black.opacity(0.40), .black.opacity(0.10), .black.opacity(0.50)],
+                stops: [
+                    .init(color: .black.opacity(0.62), location: 0.0),
+                    .init(color: .black.opacity(0.22), location: 0.24),
+                    .init(color: .clear, location: 0.44),
+                ],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0.5),
+                    .init(color: .black.opacity(0.30), location: 0.78),
+                    .init(color: .black.opacity(0.70), location: 1.0),
+                ],
                 startPoint: .top, endPoint: .bottom
             )
             .ignoresSafeArea()

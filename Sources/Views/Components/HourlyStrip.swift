@@ -39,9 +39,15 @@ struct HourlyStrip: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(.white.opacity(0.1), lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+        // A firmly dark surface, not a pale material: a noon-sky photo turns
+        // `.ultraThinMaterial` nearly white, and white text on it disappears.
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .overlay(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.34)))
+        )
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(.white.opacity(0.12), lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
     }
 
     private func label(_ date: Date) -> String {

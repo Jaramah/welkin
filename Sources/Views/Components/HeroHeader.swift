@@ -53,7 +53,10 @@ struct HeroHeader: View {
             .padding(.top, 2)
         }
         .multilineTextAlignment(.center)
-        .shadow(color: .black.opacity(0.35), radius: 10, y: 1)
+        // Two shadows: a tight one for edge definition and a broad one that darkens the
+        // sky right behind the type, so white stays readable even over bright cloud.
+        .shadow(color: .black.opacity(0.5), radius: 4, y: 1)
+        .shadow(color: .black.opacity(0.4), radius: 18, y: 2)
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
     }

@@ -106,25 +106,29 @@ struct ContentView: View {
         GeometryReader { geo in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    if let message = viewModel.refreshError {
-                        RefreshErrorBanner(message: message)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 60)
+                    // The first screen is a fixed height so the header pins to the top
+                    // and the hourly strip pins to the bottom, just above the tab bar,
+                    // with the photo breathing between them. The Spacer does the work —
+                    // no magic offset that drifts by device. Detail cards come below.
+                    VStack(spacing: 0) {
+                        if let message = viewModel.refreshError {
+                            RefreshErrorBanner(message: message)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 10)
+                        }
+
+                        HeroHeader(place: bundle.place, current: bundle.current,
+                                   unit: viewModel.unit, onToggleUnit: toggleUnit)
+                            .padding(.top, 14)
+
+                        Spacer(minLength: 24)
+
+                        if !bundle.hourly.isEmpty {
+                            HourlyStrip(hours: bundle.hourly, timezone: timezone)
+                                .padding(.horizontal, 14)
+                        }
                     }
-
-                    // The floating header, straight on the photo.
-                    HeroHeader(place: bundle.place, current: bundle.current,
-                               unit: viewModel.unit, onToggleUnit: toggleUnit)
-                        .padding(.top, viewModel.refreshError == nil ? 74 : 18)
-
-                    // Open the way the design does: the photo breathes, and the hourly
-                    // strip sits low. The detail cards live below it, found by scrolling.
-                    Color.clear.frame(height: max(150, geo.size.height * 0.40))
-
-                    if !bundle.hourly.isEmpty {
-                        HourlyStrip(hours: bundle.hourly, timezone: timezone)
-                            .padding(.horizontal, 14)
-                    }
+                    .frame(height: max(320, geo.size.height - 104))
 
                     VStack(spacing: 14) {
                         if !bundle.daily.isEmpty {
@@ -181,8 +185,12 @@ struct ContentView: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 38, height: 38)
-                        .background(.ultraThinMaterial, in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .overlay(Circle().fill(Color.black.opacity(0.42)))
+                        )
+                        .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 0.5))
                 }
                 .accessibilityLabel("Temperature unit")
                 .accessibilityValue(viewModel.unit == .celsius ? "Celsius" : "Fahrenheit")
@@ -242,8 +250,12 @@ private struct ToastView: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(.ultraThinMaterial, in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                .background(
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                        .overlay(Capsule().fill(Color.black.opacity(0.5)))
+                )
+                .overlay(Capsule().stroke(.white.opacity(0.14), lineWidth: 0.5))
                 .padding(.bottom, 96)
         }
         .transition(.opacity)

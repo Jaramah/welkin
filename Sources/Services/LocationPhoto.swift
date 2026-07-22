@@ -50,13 +50,20 @@ actor LocationPhotoStore {
     // MARK: Fetch
 
     private func fetch(for place: Place) async throws -> LocationPhoto? {
-        for title in Self.candidateTitles(for: place) {
-            // 1) A real cityscape from a Commons search. This is what keeps Singapore a
-            //    skyline rather than the national flag its Wikipedia article leads with —
-            //    the article's lead image is often a flag, map or crest, not a photo.
-            if let photo = try await commonsPhoto(matching: title) { return photo }
+        let titles = Self.candidateTitles(for: place)
 
-            // 2) Fall back to the article's own lead image for places a search misses.
+        // 1) A real cityscape for ANY of the titles — name, then region, then country.
+        //    A Singapore neighbourhood ("Bedok", "Tampines") returns nothing on its own,
+        //    so this is what falls through to "Singapore" and lands the Marina Bay
+        //    skyline instead of the national flag its article leads with. Trying every
+        //    title's search before any article image means the city photo wins over a
+        //    mediocre lead image for the suburb.
+        for title in titles {
+            if let photo = try await commonsPhoto(matching: title) { return photo }
+        }
+
+        // 2) Only if no cityscape exists anywhere, use an article's own lead image.
+        for title in titles {
             if let (thumbURL, fileTitle) = try await pageImage(title: title) {
                 let credit = try? await imageCredit(fileTitle: fileTitle)
                 let data = try await get(thumbURL)

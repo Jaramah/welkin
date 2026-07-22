@@ -19,16 +19,24 @@ struct WelkinTabBar: View {
                 tab(.photos, icon: "photo.fill", title: "Photos")
             }
             .padding(5)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.12), lineWidth: 0.5))
+            .background(
+                RoundedRectangle(cornerRadius: 22)
+                    .fill(.ultraThinMaterial)
+                    .overlay(RoundedRectangle(cornerRadius: 22).fill(Color.black.opacity(0.42)))
+            )
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.14), lineWidth: 0.5))
 
             Button(action: onSearch) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 48, height: 48)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .overlay(Circle().fill(Color.black.opacity(0.42)))
+                    )
+                    .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 0.5))
             }
             .accessibilityLabel("Search locations")
         }
